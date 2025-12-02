@@ -24,6 +24,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - Redis: localhost:6379
 - SQL Server: localhost:1433（SA 密码见 `.env`，默认 `YourStrong!Passw0rd`）
 - MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
+- SeaTunnel: 容器内运行，挂载配置 `seatunnel/config`
 
 ## 常用操作
 - 启动全部：`docker compose up -d --build`
@@ -33,6 +34,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - Redis：`docker compose up -d redis`
   - SQL Server：`docker compose up -d mssql`
   - MinIO：`docker compose up -d minio`
+  - SeaTunnel：`docker compose up -d seatunnel`
 - 停止单个组件：`docker compose stop api`（或 `db` / `redis` / `mssql`）
 - 停止并清理：`docker compose down -v`
 - 查看日志：`docker compose logs -f api`（或 `db` / `redis` / `mssql`）
@@ -42,6 +44,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - Redis：`docker compose exec redis redis-cli`
   - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
   - MinIO：`docker compose exec minio /bin/sh`
+  - SeaTunnel：`docker compose exec seatunnel /bin/bash`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源，并为两张表开启 CDC（Change Data Capture）。
@@ -63,6 +66,13 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 - MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
+- SeaTunnel：容器内执行任务，例如 `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/seatunnel.conf -m local`
+
+## SeaTunnel 说明
+- 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config` 和日志目录 `seatunnel/logs`。
+- 默认命令 `sleep infinity`，保持容器存活；运行任务请使用：  
+  `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/seatunnel.conf -m local`
+- 示例配置：`seatunnel/config/seatunnel.conf`（FakeSource -> Console）。可替换为实际 source/sink（如 JDBC/MinIO/S3 等），并在同目录新增自定义配置文件。
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖

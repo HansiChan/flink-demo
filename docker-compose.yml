@@ -73,6 +73,20 @@ services:
       timeout: 10s
       retries: 5
 
+  seatunnel:
+    image: apache/seatunnel:2.3.12
+    command: ["sleep", "infinity"] # keep container running; exec seatunnel.sh to run jobs
+    environment:
+      - SEATUNNEL_HOME=/opt/seatunnel
+    volumes:
+      - ./seatunnel/config:/opt/seatunnel/config
+      - ./seatunnel/logs:/opt/seatunnel/logs
+    depends_on:
+      - db
+      - mssql
+      - redis
+      - minio
+
 volumes:
   db-data:
   redis-data:
