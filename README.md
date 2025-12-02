@@ -67,7 +67,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - 运行任务：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 
 ## SeaTunnel 说明
-- 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`）和日志目录 `seatunnel/logs`。
+- 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`）。
 - 默认启动 engine（含 Web 8080），容器内可运行作业：  
   `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 - 示例配置：

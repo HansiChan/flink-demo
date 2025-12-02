@@ -71,7 +71,6 @@ services:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
       - ./seatunnel/config:/opt/config/user_config
-      - ./seatunnel/logs:/opt/seatunnel/logs
     depends_on:
       - db
       - mssql
