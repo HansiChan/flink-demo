@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/code
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-demo}:${POSTGRES_PASSWORD:-demo}@db:5432/${POSTGRES_DB:-demo}
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-demo}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-demo}
+      - POSTGRES_DB=${POSTGRES_DB:-demo}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+
+  mssql:
+    build: ./mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}
+      - MSSQL_PID=Developer
+      - ODS_WRITE_ENABLED=${ODS_WRITE_ENABLED:-true}
+      - ODS_WRITE_INTERVAL_SECONDS=${ODS_WRITE_INTERVAL_SECONDS:-2}
+      - ODS_WRITE_BATCH_SIZE=${ODS_WRITE_BATCH_SIZE:-1}
+      - ODS_WRITE_MAX_ROWS=${ODS_WRITE_MAX_ROWS:-0}
+    volumes:
+      - mssql-data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}", "-Q", "SELECT 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  db-data:
+  redis-data:
+  mssql-data:
