@@ -41,7 +41,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
 
 ## SQL Server ODS 说明
-- `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源。
+- `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源，并为两张表开启 CDC（Change Data Capture）。
 - 如需调整种子数据或表结构，可修改 `mssql/ods_seed.sql` 并重建镜像：`docker compose build mssql && docker compose up -d`.
 
 ### 连续写入配置（实时模拟 ODS 数据）
