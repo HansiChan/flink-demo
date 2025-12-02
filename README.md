@@ -38,7 +38,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - API：`docker compose exec api /bin/bash`
   - PostgreSQL：`docker compose exec db psql -U $POSTGRES_USER -d $POSTGRES_DB`
   - Redis：`docker compose exec redis redis-cli`
-  - SQL Server：`docker compose exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD`
+  - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源。
@@ -56,7 +56,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - API：`http://localhost:8000/`
 - PostgreSQL：`psql postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB`
 - Redis CLI：`redis-cli -h localhost -p 6379`
-- SQL Server（容器内）：`docker compose exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD`
+- SQL Server（容器内）：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 
 ## 扩展思路
