@@ -1,29 +1,6 @@
 version: "3.9"
 
 services:
-  api:
-    build: ./app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./app:/code
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-demo}:${POSTGRES_PASSWORD:-demo}@db:5432/${POSTGRES_DB:-demo}
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-demo}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-demo}
-      - POSTGRES_DB=${POSTGRES_DB:-demo}
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   mssql:
     build: ./mssql
@@ -66,19 +43,30 @@ services:
   seatunnel:
     image: apache/seatunnel:2.3.12
     user: "0:0"
-    command: ["/bin/sh", "-lc", "./bin/seatunnel-cluster.sh -d; touch /opt/seatunnel/logs/seatunnel-engine-server.log; tail -F /opt/seatunnel/logs/seatunnel-engine-server.log"]
+    command: ["/bin/sh", "-c", "mkdir -p /opt/seatunnel/logs && ./bin/seatunnel-cluster.sh -r master && touch /opt/seatunnel/logs/seatunnel-engine-master.log && tail -F /opt/seatunnel/logs/seatunnel-engine-master.log"]
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
       - ./seatunnel/config:/opt/config/user_config
     depends_on:
-      - db
       - mssql
       - minio
     ports:
       - "8080:8080"
 
+  seatunnel-worker:
+    image: apache/seatunnel:2.3.12
+    user: "0:0"
+    command: ["/bin/sh", "-c", "mkdir -p /opt/seatunnel/logs && ./bin/seatunnel-cluster.sh -r worker && touch /opt/seatunnel/logs/seatunnel-engine-worker.log && tail -F /opt/seatunnel/logs/seatunnel-engine-worker.log"]
+    environment:
+      - SEATUNNEL_HOME=/opt/seatunnel
+    volumes:
+      - ./seatunnel/config:/opt/config/user_config
+    depends_on:
+      - seatunnel
+      - mssql
+      - minio
+
 volumes:
-  db-data:
   mssql-data:
   minio-data:
