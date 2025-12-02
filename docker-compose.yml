@@ -48,10 +48,10 @@ services:
     container_name: seatunnel_master
     networks:
       demo:
-        ipv4_address: 172.16.0.2
+        ipv4_address: 172.16.0.10
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
-      - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
+      - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
     volumes:
       - ./seatunnel/config:/opt/config/user_config
@@ -63,10 +63,10 @@ services:
     container_name: seatunnel_worker_1
     networks:
       demo:
-        ipv4_address: 172.16.0.3
+        ipv4_address: 172.16.0.11
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
-      - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
+      - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/config/user_config
@@ -78,10 +78,10 @@ services:
     container_name: seatunnel_worker_2
     networks:
       demo:
-        ipv4_address: 172.16.0.4
+        ipv4_address: 172.16.0.12
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
-      - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
+      - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/config/user_config
