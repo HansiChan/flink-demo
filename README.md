@@ -23,6 +23,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - PostgreSQL: localhost:5432（默认 demo/demo）
 - Redis: localhost:6379
 - SQL Server: localhost:1433（SA 密码见 `.env`，默认 `YourStrong!Passw0rd`）
+- MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
 
 ## 常用操作
 - 启动全部：`docker compose up -d --build`
@@ -31,6 +32,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - PostgreSQL：`docker compose up -d db`
   - Redis：`docker compose up -d redis`
   - SQL Server：`docker compose up -d mssql`
+  - MinIO：`docker compose up -d minio`
 - 停止单个组件：`docker compose stop api`（或 `db` / `redis` / `mssql`）
 - 停止并清理：`docker compose down -v`
 - 查看日志：`docker compose logs -f api`（或 `db` / `redis` / `mssql`）
@@ -39,6 +41,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - PostgreSQL：`docker compose exec db psql -U $POSTGRES_USER -d $POSTGRES_DB`
   - Redis：`docker compose exec redis redis-cli`
   - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
+  - MinIO：`docker compose exec minio /bin/sh`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源，并为两张表开启 CDC（Change Data Capture）。
@@ -58,6 +61,8 @@ docker compose up -d --build  # 首次启动时构建镜像
 - Redis CLI：`redis-cli -h localhost -p 6379`
 - SQL Server（容器内）：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
+- MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
+- MinIO 控制台：浏览器打开 `http://localhost:9001`
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖
