@@ -57,6 +57,7 @@ services:
       - ./seatunnel/config:/opt/config/user_config
     ports:
       - "5801:5801"
+      - "8080:8080"
 
   seatunnel-worker1:
     image: apache/seatunnel:2.3.12
