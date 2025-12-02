@@ -25,8 +25,20 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SQL Server: localhost:1433（SA 密码见 `.env`，默认 `YourStrong!Passw0rd`）
 
 ## 常用操作
-- 查看服务日志：`docker compose logs -f api`（或 `db` / `redis`）
+- 启动全部：`docker compose up -d --build`
+- 启动单个组件：
+  - API：`docker compose up -d api`
+  - PostgreSQL：`docker compose up -d db`
+  - Redis：`docker compose up -d redis`
+  - SQL Server：`docker compose up -d mssql`
+- 停止单个组件：`docker compose stop api`（或 `db` / `redis` / `mssql`）
 - 停止并清理：`docker compose down -v`
+- 查看日志：`docker compose logs -f api`（或 `db` / `redis` / `mssql`）
+- 进入容器：
+  - API：`docker compose exec api /bin/bash`
+  - PostgreSQL：`docker compose exec db psql -U $POSTGRES_USER -d $POSTGRES_DB`
+  - Redis：`docker compose exec redis redis-cli`
+  - SQL Server：`docker compose exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源。
@@ -39,6 +51,13 @@ docker compose up -d --build  # 首次启动时构建镜像
   - `ODS_WRITE_BATCH_SIZE`：每次写入的行数（默认 `1`）
   - `ODS_WRITE_MAX_ROWS`：最多写入多少行后停止（默认 `0` 表示不限制）
 - 写入脚本位于 `mssql/ods_writer.sh`，由 `entrypoint.sh` 启动；如需更改逻辑可修改脚本后重建镜像。
+
+### 连接示例
+- API：`http://localhost:8000/`
+- PostgreSQL：`psql postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB`
+- Redis CLI：`redis-cli -h localhost -p 6379`
+- SQL Server（容器内）：`docker compose exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD`
+- SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖

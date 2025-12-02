@@ -6,18 +6,20 @@ if [ -z "$MSSQL_SA_PASSWORD" ]; then
   exit 1
 fi
 
+SQLCMD_BIN=${SQLCMD_BIN:-sqlcmd}
+
 /opt/mssql/bin/sqlservr &
 sqlservr_pid=$!
 
 # Wait for SQL Server to accept connections
 for i in {1..30}; do
-  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT 1" >/dev/null 2>&1 && break
+  $SQLCMD_BIN -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -Q "SELECT 1" >/dev/null 2>&1 && break
   echo "Waiting for SQL Server to start... ($i/30)"
   sleep 2
 done
 
 # Seed ODS data
-/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -d master -i /docker-entrypoint-initdb.d/ods_seed.sql
+$SQLCMD_BIN -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -d master -i /docker-entrypoint-initdb.d/ods_seed.sql
 
 # Optional continuous writer for ODS orders
 ODS_WRITE_ENABLED=${ODS_WRITE_ENABLED:-true}

@@ -5,10 +5,11 @@ SA_PASSWORD=$1
 INTERVAL_SECONDS=$2
 BATCH_SIZE=$3
 MAX_ROWS=$4
+SQLCMD_BIN=${SQLCMD_BIN:-sqlcmd}
 
 insert_batch() {
   local inserts=$1
-  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -d ods -b -Q "
+  $SQLCMD_BIN -S localhost -U SA -P "$SA_PASSWORD" -d ods -b -Q "
     SET NOCOUNT ON;
     DECLARE @i INT = 0;
     WHILE @i < $inserts
@@ -27,7 +28,7 @@ insert_batch() {
 }
 
 while true; do
-  current=$(/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -d ods -h -1 -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM ods_orders;" | tr -d '\r')
+  current=$($SQLCMD_BIN -S localhost -U SA -P "$SA_PASSWORD" -d ods -h -1 -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM ods_orders;" | tr -d '\r')
   current=${current:-0}
 
   if [[ "$MAX_ROWS" -gt 0 && "$current" -ge "$MAX_ROWS" ]]; then
