@@ -54,7 +54,7 @@ services:
       - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
     volumes:
-      - ./seatunnel/config:/opt/config/user_config
+      - ./seatunnel/config:/opt/seatunnel/config/user_config
     ports:
       - "5801:5801"
       - "8080:8080"
@@ -70,7 +70,7 @@ services:
       - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
-      - ./seatunnel/config:/opt/config/user_config
+      - ./seatunnel/config:/opt/seatunnel/config/user_config
     depends_on:
       - seatunnel
 
@@ -85,7 +85,7 @@ services:
       - ST_DOCKER_MEMBER_LIST=172.16.0.10,172.16.0.11,172.16.0.12
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
-      - ./seatunnel/config:/opt/config/user_config
+      - ./seatunnel/config:/opt/seatunnel/config/user_config
     depends_on:
       - seatunnel
 
