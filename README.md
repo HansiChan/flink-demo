@@ -72,7 +72,17 @@ docker compose up -d --build  # 首次启动时构建镜像
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config` 和日志目录 `seatunnel/logs`。
 - 默认命令 `sleep infinity`，保持容器存活；运行任务请使用：  
   `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/seatunnel.conf -m local`
-- 示例配置：`seatunnel/config/seatunnel.conf`（FakeSource -> Console）。可替换为实际 source/sink（如 JDBC/MinIO/S3 等），并在同目录新增自定义配置文件。
+- 示例配置：
+  - `seatunnel/config/seatunnel.conf`：FakeSource -> Console。
+  - `seatunnel/config/sqlserver_to_paimon.conf`：SQL Server CDC 多表（`ods_customers`、`ods_orders`）写入 MinIO 上的 Paimon，按 SeaTunnel 2.3.12 多表示例配置。
+    - 依赖环境变量：`MSSQL_SA_PASSWORD`、`MINIO_ROOT_USER`、`MINIO_ROOT_PASSWORD`、`PAIMON_BUCKET`（默认 `paimon-warehouse`）。
+    - 运行示例：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/sqlserver_to_paimon.conf -m local`
+    - 请先在 MinIO 创建桶 `${PAIMON_BUCKET}`（默认 `paimon-warehouse`），例如：
+      - `docker compose exec minio mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`
+      - `docker compose exec minio mc mb local/$PAIMON_BUCKET`
+- 插件：SQLServer CDC -> Paimon 需要安装连接器（2.3.12 对应版本）。首次使用前在 seatunnel 容器内执行：
+  - `docker compose exec seatunnel /bin/sh /opt/seatunnel/install-plugins.sh`
+  - 如需手动命令：`docker compose exec seatunnel ./bin/install-plugin.sh --plugins seatunnel-connector-v2-sqlserver-cdc,seatunnel-connector-v2-paimon`
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖
