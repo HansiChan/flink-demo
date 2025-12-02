@@ -71,6 +71,7 @@ services:
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config
       - ./seatunnel/logs:/opt/seatunnel/logs
+      - ./seatunnel/install-plugins.sh:/opt/seatunnel/install-plugins.sh:ro
     depends_on:
       - db
       - mssql
