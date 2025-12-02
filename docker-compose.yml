@@ -65,7 +65,7 @@ services:
 
   seatunnel:
     image: apache/seatunnel:2.3.12
-    command: ["bash", "-lc", "./bin/seatunnel-cluster.sh -d && tail -f /opt/seatunnel/logs/seatunnel-engine-server.log"]
+    command: ["/bin/sh", "-lc", "./bin/seatunnel-cluster.sh -d && tail -f /opt/seatunnel/logs/seatunnel-engine-server.log"]
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
