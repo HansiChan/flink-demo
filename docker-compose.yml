@@ -65,13 +65,13 @@ services:
 
   seatunnel:
     image: apache/seatunnel:2.3.12
+    user: "0:0"
     command: ["/bin/sh", "-lc", "./bin/seatunnel-cluster.sh -d && tail -f /opt/seatunnel/logs/seatunnel-engine-server.log"]
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
       - ./seatunnel/config:/opt/config/user_config
       - ./seatunnel/logs:/opt/seatunnel/logs
-      - ./seatunnel/install-plugins.sh:/opt/seatunnel/install-plugins.sh:ro
     depends_on:
       - db
       - mssql
