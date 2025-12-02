@@ -23,7 +23,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - PostgreSQL: localhost:5432（默认 demo/demo）
 - SQL Server: localhost:1433（SA 密码见 `.env`，默认 `YourStrong!Passw0rd`）
 - MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
-- SeaTunnel: 容器内运行，挂载配置 `seatunnel/config`
+- SeaTunnel: 容器内运行，挂载配置 `seatunnel/config`，已开启 Web (8080)
 
 ## 常用操作
 - 启动全部：`docker compose up -d --build`
@@ -62,11 +62,13 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 - MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
-- SeaTunnel：容器内执行任务，例如 `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
+- SeaTunnel：
+  - Web UI：`http://localhost:8080`（镜像默认开启 HTTP）
+  - 运行任务：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 
 ## SeaTunnel 说明
-- 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config` 和日志目录 `seatunnel/logs`。
-- 默认命令 `sleep infinity`，保持容器存活；运行任务请使用：  
+- 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`）和日志目录 `seatunnel/logs`。
+- 默认启动 engine（含 Web 8080），容器内可运行作业：  
   `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 - 示例配置：
   - `seatunnel/config/seatunnel.conf`：FakeSource -> Console。
@@ -79,6 +81,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - 插件：SQLServer CDC -> Paimon 需要安装连接器（2.3.12 对应版本）。首次使用前在 seatunnel 容器内执行：
   - `docker compose exec seatunnel /bin/sh /opt/seatunnel/install-plugins.sh`
   - 如需手动命令：`docker compose exec seatunnel ./bin/install-plugin.sh --plugins seatunnel-connector-v2-sqlserver-cdc,seatunnel-connector-v2-paimon`
+- Web 配置：镜像默认启用 HTTP 8080。如需自定义（如 Basic Auth），可准备 seatunnel.yaml 后自行挂载覆盖。
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖

@@ -65,7 +65,7 @@ services:
 
   seatunnel:
     image: apache/seatunnel:2.3.12
-    command: ["sleep", "infinity"] # keep container running; exec seatunnel.sh to run jobs
+    command: ["bash", "-lc", "./bin/seatunnel-cluster.sh -d && tail -f /opt/seatunnel/logs/seatunnel-engine-server.log"]
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
@@ -76,6 +76,8 @@ services:
       - db
       - mssql
       - minio
+    ports:
+      - "8080:8080"
 
 volumes:
   db-data:
