@@ -1,6 +1,6 @@
 # docker compose 项目框架
 
-一个包含 SQL Server、MinIO、SeaTunnel 集群的 docker-compose 模板，适合作为数据同步/CDC 体验的起点。
+一个包含 SQL Server、MinIO、SeaTunnel 集群（1 Master + 2 Worker）的 docker-compose 模板，适合作为数据同步/CDC 体验的起点。
 
 ## 目录结构
 - `docker-compose.yml`：服务编排
@@ -20,22 +20,23 @@ docker compose up -d --build  # 首次启动时构建镜像
 启动完成后：
 - SQL Server: localhost:1433（SA 密码见 `.env`）
 - MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
-- SeaTunnel 集群：Web (8080)，Master/Worker 容器均已启动，用户配置挂载 `seatunnel/config`
+- SeaTunnel 集群：Master (REST 5801) + Worker1 + Worker2，用户配置挂载 `seatunnel/config`
 
 ## 常用操作
 - 启动全部：`docker compose up -d --build`
 - 启动单个组件：
   - SQL Server：`docker compose up -d mssql`
   - MinIO：`docker compose up -d minio`
-  - SeaTunnel 集群：`docker compose up -d seatunnel seatunnel-worker`
-- 停止单个组件：`docker compose stop mssql`（或 `minio` / `seatunnel` / `seatunnel-worker`）
+  - SeaTunnel 集群：`docker compose up -d seatunnel seatunnel-worker1 seatunnel-worker2`
+- 停止单个组件：`docker compose stop mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
 - 停止并清理：`docker compose down -v`
-- 查看日志：`docker compose logs -f mssql`（或 `minio` / `seatunnel` / `seatunnel-worker`）
+- 查看日志：`docker compose logs -f mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
 - 进入容器：
   - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
   - MinIO：`docker compose exec minio /bin/sh`
   - SeaTunnel Master：`docker compose exec seatunnel /bin/bash`
-  - SeaTunnel Worker：`docker compose exec seatunnel-worker /bin/bash`
+  - SeaTunnel Worker1：`docker compose exec seatunnel-worker1 /bin/bash`
+  - SeaTunnel Worker2：`docker compose exec seatunnel-worker2 /bin/bash`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源，并为两张表开启 CDC（Change Data Capture）。
@@ -55,12 +56,12 @@ docker compose up -d --build  # 首次启动时构建镜像
 - MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
 - SeaTunnel：
-  - Web UI：`http://localhost:8080`（镜像默认开启 HTTP）
+  - REST（默认 5801 暴露自 Master）
   - 运行任务：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 
 ## SeaTunnel 说明
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`），容器启动时会拉起 engine 并跟随日志。
-- 默认启动 engine（含 Web 8080），容器内可运行作业：  
+- 默认启动 engine，容器内可运行作业：  
   `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 - 示例配置：
   - `seatunnel/config/seatunnel.conf`：FakeSource -> Console。
@@ -70,10 +71,7 @@ docker compose up -d --build  # 首次启动时构建镜像
     - 请先在 MinIO 创建桶 `${PAIMON_BUCKET}`（默认 `paimon-warehouse`），例如：
       - `docker compose exec minio mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`
       - `docker compose exec minio mc mb local/$PAIMON_BUCKET`
-- 插件：SQLServer CDC -> Paimon 需要安装连接器（2.3.12 对应版本）。首次使用前在 seatunnel 容器内执行：
-  - `docker compose exec seatunnel /bin/sh /opt/seatunnel/install-plugins.sh`
-  - 如需手动命令：`docker compose exec seatunnel ./bin/install-plugin.sh --plugins seatunnel-connector-v2-sqlserver-cdc,seatunnel-connector-v2-paimon`
-- Web 配置：镜像默认启用 HTTP 8080。如需自定义（如 Basic Auth），可准备 seatunnel.yaml 后自行挂载覆盖。
+
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖
