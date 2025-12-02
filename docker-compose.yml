@@ -69,7 +69,7 @@ services:
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
     volumes:
-      - ./seatunnel/config:/opt/seatunnel/config
+      - ./seatunnel/config:/opt/config/user_config
       - ./seatunnel/logs:/opt/seatunnel/logs
       - ./seatunnel/install-plugins.sh:/opt/seatunnel/install-plugins.sh:ro
     depends_on:

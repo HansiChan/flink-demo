@@ -62,17 +62,17 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 - MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
-- SeaTunnel：容器内执行任务，例如 `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/seatunnel.conf -m local`
+- SeaTunnel：容器内执行任务，例如 `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 
 ## SeaTunnel 说明
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config` 和日志目录 `seatunnel/logs`。
 - 默认命令 `sleep infinity`，保持容器存活；运行任务请使用：  
-  `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/seatunnel.conf -m local`
+  `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
 - 示例配置：
   - `seatunnel/config/seatunnel.conf`：FakeSource -> Console。
   - `seatunnel/config/sqlserver_to_paimon.conf`：SQL Server CDC 多表（`ods_customers`、`ods_orders`）写入 MinIO 上的 Paimon，按 SeaTunnel 2.3.12 多表示例配置。
     - 依赖环境变量：`MSSQL_SA_PASSWORD`、`MINIO_ROOT_USER`、`MINIO_ROOT_PASSWORD`、`PAIMON_BUCKET`（默认 `paimon-warehouse`）。
-    - 运行示例：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/sqlserver_to_paimon.conf -m local`
+    - 运行示例：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/sqlserver_to_paimon.conf -m local`
     - 请先在 MinIO 创建桶 `${PAIMON_BUCKET}`（默认 `paimon-warehouse`），例如：
       - `docker compose exec minio mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`
       - `docker compose exec minio mc mb local/$PAIMON_BUCKET`
