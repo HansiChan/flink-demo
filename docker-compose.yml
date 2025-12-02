@@ -8,12 +8,10 @@ services:
       - ./app:/code
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-demo}:${POSTGRES_PASSWORD:-demo}@db:5432/${POSTGRES_DB:-demo}
-      - REDIS_URL=redis://redis:6379/0
     ports:
       - "8000:8000"
     depends_on:
       - db
-      - redis
 
   db:
     image: postgres:15
@@ -26,14 +24,6 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
-  redis:
-    image: redis:7
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-    ports:
-      - "6379:6379"
 
   mssql:
     build: ./mssql
@@ -84,11 +74,9 @@ services:
     depends_on:
       - db
       - mssql
-      - redis
       - minio
 
 volumes:
   db-data:
-  redis-data:
   mssql-data:
   minio-data:

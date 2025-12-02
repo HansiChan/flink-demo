@@ -21,7 +21,6 @@ docker compose up -d --build  # 首次启动时构建镜像
 - API: http://localhost:8000/
 - 健康检查: http://localhost:8000/health
 - PostgreSQL: localhost:5432（默认 demo/demo）
-- Redis: localhost:6379
 - SQL Server: localhost:1433（SA 密码见 `.env`，默认 `YourStrong!Passw0rd`）
 - MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
 - SeaTunnel: 容器内运行，挂载配置 `seatunnel/config`
@@ -31,17 +30,15 @@ docker compose up -d --build  # 首次启动时构建镜像
 - 启动单个组件：
   - API：`docker compose up -d api`
   - PostgreSQL：`docker compose up -d db`
-  - Redis：`docker compose up -d redis`
   - SQL Server：`docker compose up -d mssql`
   - MinIO：`docker compose up -d minio`
   - SeaTunnel：`docker compose up -d seatunnel`
-- 停止单个组件：`docker compose stop api`（或 `db` / `redis` / `mssql`）
+- 停止单个组件：`docker compose stop api`（或 `db` / `mssql` / `minio` / `seatunnel`）
 - 停止并清理：`docker compose down -v`
-- 查看日志：`docker compose logs -f api`（或 `db` / `redis` / `mssql`）
+- 查看日志：`docker compose logs -f api`（或 `db` / `mssql` / `minio` / `seatunnel`）
 - 进入容器：
   - API：`docker compose exec api /bin/bash`
   - PostgreSQL：`docker compose exec db psql -U $POSTGRES_USER -d $POSTGRES_DB`
-  - Redis：`docker compose exec redis redis-cli`
   - SQL Server：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
   - MinIO：`docker compose exec minio /bin/sh`
   - SeaTunnel：`docker compose exec seatunnel /bin/bash`
@@ -61,7 +58,6 @@ docker compose up -d --build  # 首次启动时构建镜像
 ### 连接示例
 - API：`http://localhost:8000/`
 - PostgreSQL：`psql postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB`
-- Redis CLI：`redis-cli -h localhost -p 6379`
 - SQL Server（容器内）：`docker compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
 - SQL Server（本机客户端）：服务器 `localhost`, 端口 `1433`, 用户 `SA`, 密码取自 `.env`。
 - MinIO S3：`http://localhost:9000`，访问密钥/密钥取 `.env` 中 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`
