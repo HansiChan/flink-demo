@@ -47,6 +47,8 @@ services:
     container_name: seatunnel_master
     environment:
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4    
+    volumes:
+      - ./config:/opt/seatunnel/config/user_config
     entrypoint: >
       /bin/sh -c "
       /opt/seatunnel/bin/seatunnel-cluster.sh -r master
@@ -63,6 +65,8 @@ services:
     container_name: seatunnel_worker_1
     environment:
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
+    volumes:
+      - ./config:/opt/seatunnel/config/user_config
     entrypoint: >
       /bin/sh -c "
       /opt/seatunnel/bin/seatunnel-cluster.sh -r worker
@@ -78,6 +82,8 @@ services:
     container_name: seatunnel_worker_2
     environment:
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
+    volumes:
+      - ./config:/opt/seatunnel/config/user_config
     entrypoint: >
       /bin/sh -c "
       /opt/seatunnel/bin/seatunnel-cluster.sh -r worker
