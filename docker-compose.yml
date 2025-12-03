@@ -55,6 +55,7 @@ services:
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
+      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
     ports:
       - "5801:5801"
       - "8080:8080"
@@ -71,6 +72,7 @@ services:
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
+      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
     depends_on:
       - seatunnel
 
@@ -86,6 +88,7 @@ services:
     command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
+      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
     depends_on:
       - seatunnel
 
