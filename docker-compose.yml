@@ -44,7 +44,7 @@ services:
       retries: 5
 
   seatunnel:
-    image: apache/seatunnel:2.3.12
+    image: apache/seatunnel:2.3.11
     container_name: seatunnel_master
     networks:
       demo:
@@ -61,7 +61,7 @@ services:
       - "8080:8080"
 
   seatunnel-worker1:
-    image: apache/seatunnel:2.3.12
+    image: apache/seatunnel:2.3.11
     container_name: seatunnel_worker_1
     networks:
       demo:
@@ -77,7 +77,7 @@ services:
       - seatunnel
 
   seatunnel-worker2:
-    image: apache/seatunnel:2.3.12
+    image: apache/seatunnel:2.3.11
     container_name: seatunnel_worker_2
     networks:
       demo:
