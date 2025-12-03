@@ -57,7 +57,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
 - SeaTunnel：
   - REST（默认 5801 暴露自 Master）
-  - 运行任务：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/user_config/sqlserver_to_paimon.conf -m local`
+  - 运行任务：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/seatunnel/config/user_config/sqlserver_to_paimon.conf -m cluster`
 
 ## SeaTunnel 说明
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`），容器启动时会拉起 engine 并跟随日志。

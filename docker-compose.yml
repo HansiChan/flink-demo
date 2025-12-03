@@ -57,7 +57,7 @@ services:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
       - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
     ports:
-      - "5801:5801"
+      - "5701:5701"
       - "8080:8080"
 
   seatunnel-worker1:
