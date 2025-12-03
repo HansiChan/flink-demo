@@ -50,7 +50,6 @@ services:
       demo:
         ipv4_address: 172.16.0.2
     environment:
-      - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
     entrypoint: >
       ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
@@ -68,7 +67,6 @@ services:
       demo:
         ipv4_address: 172.16.0.3
     environment:
-      - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
     entrypoint: >
       ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
@@ -85,7 +83,6 @@ services:
       demo:
         ipv4_address: 172.16.0.4
     environment:
-      - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
     entrypoint: >
       ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
