@@ -43,54 +43,51 @@ services:
       timeout: 10s
       retries: 5
 
-  seatunnel:
+   master:
     image: apache/seatunnel
     container_name: seatunnel_master
+    environment:
+      - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4    
+    entrypoint: >
+      /bin/sh -c "
+      /opt/seatunnel/bin/seatunnel-cluster.sh -r master
+      "    
+    ports:
+      - "5801:5801"  
+      - "8080:8080"
     networks:
       demo:
         ipv4_address: 172.16.0.2
+
+  worker1:
+    image: apache/seatunnel
+    container_name: seatunnel_worker_1
     environment:
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
     entrypoint: >
-      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
-    volumes:
-      - ./seatunnel/config:/opt/seatunnel/config/user_config
-      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
-    ports:
-      - "5701:5701"
-      - "8080:8080"
-
-  seatunnel-worker1:
-    image: apache/seatunnel
-    container_name: seatunnel_worker_1
+      /bin/sh -c "
+      /opt/seatunnel/bin/seatunnel-cluster.sh -r worker
+      " 
+    depends_on:
+      - master
     networks:
       demo:
         ipv4_address: 172.16.0.3
+
+  worker2:
+    image: apache/seatunnel
+    container_name: seatunnel_worker_2
     environment:
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
     entrypoint: >
-      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
-    volumes:
-      - ./seatunnel/config:/opt/seatunnel/config/user_config
-      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
+      /bin/sh -c "
+      /opt/seatunnel/bin/seatunnel-cluster.sh -r worker
+      " 
     depends_on:
-      - seatunnel
-
-  seatunnel-worker2:
-    image: apache/seatunnel
-    container_name: seatunnel_worker_2
+      - master
     networks:
       demo:
         ipv4_address: 172.16.0.4
-    environment:
-      - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
-    entrypoint: >
-      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
-    volumes:
-      - ./seatunnel/config:/opt/seatunnel/config/user_config
-      - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
-    depends_on:
-      - seatunnel
 
 networks:
   demo:
