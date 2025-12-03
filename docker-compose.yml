@@ -44,7 +44,7 @@ services:
       retries: 5
 
   seatunnel:
-    image: apache/seatunnel:2.3.11
+    image: apache/seatunnel
     container_name: seatunnel_master
     networks:
       demo:
@@ -52,7 +52,8 @@ services:
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
-    command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
+    entrypoint: >
+      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r master"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
       - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
@@ -69,7 +70,8 @@ services:
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
-    command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
+    entrypoint: >
+      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
       - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
@@ -85,7 +87,8 @@ services:
     environment:
       - SEATUNNEL_HOME=/opt/seatunnel
       - ST_DOCKER_MEMBER_LIST=172.16.0.2,172.16.0.3,172.16.0.4
-    command: ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
+    entrypoint: >
+      ["/bin/sh", "-c", "/opt/seatunnel/bin/seatunnel-cluster.sh -r worker"]
     volumes:
       - ./seatunnel/config:/opt/seatunnel/config/user_config
       - ./seatunnel/lib:/opt/seatunnel/lib/user_lib
