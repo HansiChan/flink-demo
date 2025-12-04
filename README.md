@@ -80,8 +80,9 @@ docker compose up -d --build  # 首次启动时构建镜像
 
 ## Flink（PyFlink 示例）
 - Flink JM/TM 使用本地构建镜像（基于 `flink:1.18`），按官方文档安装 `python3` + `apache-flink==1.18.0`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
+- 插件 jars（Paimon、S3 等）放在 `flink/flink-plugins/`，Compose 会挂载到容器 `/opt/flink/plugins`，已在 `.gitignore` 排除。
 - 示例作业：`flink/jobs/ods_user_total_spend.py`（实时聚合 `ods_orders`，写入 `user_total_spend`）。
-- 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib`（如 `paimon-flink-1.18-*.jar`、`flink-s3-fs-*.jar`）。
+- 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` 或 `/opt/flink/plugins`（如 `paimon-flink-1.18-*.jar`、`flink-s3-fs-*.jar`）。
 - 启动并提交作业：
   ```bash
   docker compose build flink-jobmanager flink-taskmanager
