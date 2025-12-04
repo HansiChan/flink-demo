@@ -119,38 +119,32 @@ services:
       start_period: 30s
 
   jobmanager:
-    image: flink:1.20.1-scala_2.12-java11
-    container_name: flink_jobmanager
-    networks:
-      - demo
+    image: flink:1.20.2-scala_2.12-java11
     ports:
       - "8081:8081"
-    command: job-cluster
+    command: jobmanager
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        rest.port: 8081
+        jobmanager.rpc.address: jobmanager      
     volumes:
       - ./flink/jobs:/opt/flink/usrlib
       - ./flink/lib:/opt/flink/lib
 
   taskmanager:
-    image: flink:1.20.1-scala_2.12-java11
-    container_name: flink_taskmanager
-    networks:
-      - demo
+    image: flink:1.20.2-scala_2.12-java11
     depends_on:
       - jobmanager
-    command: task-manager
+    command: taskmanager
+    scale: 1
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2   
     volumes:
       - ./flink/jobs:/opt/flink/usrlib
       - ./flink/lib:/opt/flink/lib
-
 
 networks:
   demo:
