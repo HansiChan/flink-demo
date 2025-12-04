@@ -73,20 +73,20 @@ CREATE TABLE IF NOT EXISTS dwd.customer_order_metrics_10m (
     PRIMARY KEY (window_start, customer_id) NOT ENFORCED
 ) PARTITIONED BY (dt);
 
--- Enrich orders with customer info via temporal join (materialized as a view for windowing)
-CREATE OR REPLACE TEMPORARY VIEW ods_orders_enriched AS
-SELECT
-    o.order_id,
-    o.customer_id,
-    o.amount,
-    o.status,
-    o.order_ts,
-    c.customer_name,
-    c.region
-FROM ods_orders_stream AS o
-LEFT JOIN ods_customers_dim FOR SYSTEM_TIME AS OF o.proctime AS c
-ON o.customer_id = c.customer_id;
-
+-- Enrich orders with customer info via temporal join, then window
+WITH ods_orders_enriched AS (
+    SELECT
+        o.order_id,
+        o.customer_id,
+        o.amount,
+        o.status,
+        o.order_ts,
+        c.customer_name,
+        c.region
+    FROM ods_orders_stream AS o
+    LEFT JOIN ods_customers_dim FOR SYSTEM_TIME AS OF o.proctime AS c
+    ON o.customer_id = c.customer_id
+)
 INSERT INTO dwd.customer_order_metrics_10m
 SELECT
     tw.window_start,
