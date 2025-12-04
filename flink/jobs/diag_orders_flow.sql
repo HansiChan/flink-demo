@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS orders_test_sink (
     PRIMARY KEY (order_id) NOT ENFORCED
 );
 
--- Directly insert data from the orders table
+-- Directly insert data from the orders table, forcing a full scan first
 INSERT INTO orders_test_sink
 SELECT
     order_id,
@@ -33,4 +33,4 @@ SELECT
     order_date,
     amount
 FROM
-    ods.ods_orders;
+    ods.ods_orders /*+ OPTIONS('scan.mode'='full') */;
