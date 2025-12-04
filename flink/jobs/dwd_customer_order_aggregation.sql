@@ -22,7 +22,7 @@ ALTER TABLE ods.ods_orders SET (
 -- The warehouse path 's3a://demo/' assumes Paimon data is in a bucket named 'demo'.
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
-    'warehouse' = 's3a://demo/',
+    'warehouse' = 's3://demo/',
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
     's3.secret-key' = 'minioadmin',
