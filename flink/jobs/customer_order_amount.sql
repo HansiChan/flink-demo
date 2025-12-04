@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS customer_order_summary (
     PRIMARY KEY (customer_id) NOT ENFORCED
 ) WITH (
     'connector' = 'paimon',
-    'changelog-producer' = 'full-compaction',
+    'changelog-producer' = 'input',
     'file.format' = 'parquet'
 );
 
