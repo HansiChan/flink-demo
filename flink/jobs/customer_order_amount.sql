@@ -13,6 +13,17 @@ USE CATALOG paimon;
 
 USE ods;
 
+-- Create a new table to store the aggregated results
+CREATE TABLE IF NOT EXISTS customer_order_summary (
+    customer_id INT,
+    total_amount DECIMAL(10, 2),
+    PRIMARY KEY (customer_id) NOT ENFORCED
+) WITH (
+    'connector' = 'paimon',
+    'changelog-producer' = 'full-compaction',
+    'file.format' = 'parquet'
+);
+
 -- a sql that calculate total order amount for each customer
 INSERT INTO customer_order_summary
 SELECT
