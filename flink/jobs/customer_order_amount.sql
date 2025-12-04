@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS customer_order_summary (
 ) WITH (
     'connector' = 'paimon',
     'changelog-producer' = 'input',
-    'file.format' = 'parquet'
+    'file.format' = 'parquet',
+    'write-only' = 'false',
+    'table.exec.sink.upsert-materialize' = 'true'
 );
 
 -- a sql that calculate total order amount for each customer
