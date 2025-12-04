@@ -79,7 +79,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 
 
 ## Flink（PyFlink 示例）
-- Flink JM/TM 使用本地构建镜像（基于 `flink:1.18`），按官方文档安装 `python3` + `apache-flink==1.18.0`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
+- Flink JM/TM 使用本地构建镜像（基于 `flink:1.18`），按官方文档安装 `python3`，在 `/opt/venv` 创建虚拟环境并安装 `apache-flink==1.18.0`，`PYFLINK_CLIENT_EXECUTABLE=/opt/venv/bin/python3`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
 - 插件 jars（Paimon、S3 等）放在 `flink/flink-plugins/`，Compose 会挂载到容器 `/opt/flink/plugins`，已在 `.gitignore` 排除。
 - 示例作业：`flink/jobs/ods_user_total_spend.py`（实时聚合 `ods_orders`，写入 `user_total_spend`）。
 - 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` 或 `/opt/flink/plugins`（如 `paimon-flink-1.18-*.jar`、`flink-s3-fs-*.jar`）。
@@ -87,7 +87,14 @@ docker compose up -d --build  # 首次启动时构建镜像
   ```bash
   docker compose build flink-jobmanager flink-taskmanager
   docker compose up -d flink-jobmanager flink-taskmanager
-  docker compose exec flink-jobmanager ./bin/flink run -py /opt/flink/usrtmp/jobs/ods_user_total_spend.py -d
+  # 显式指定 Python 可执行文件（参考官方示例）
+  docker compose exec flink-jobmanager ./bin/flink run \
+    -py /opt/flink/usrtmp/jobs/ods_user_total_spend.py \
+    -pyexec /opt/venv/bin/python3 \
+    -d
+
+  # 或直接使用封装脚本：
+  docker compose exec flink-jobmanager /opt/flink/usrtmp/jobs/run_ods_user_total_spend.sh
   ```
   停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
 

@@ -24,11 +24,11 @@ def main() -> None:
         """
         CREATE CATALOG paimon_catalog WITH (
             'type' = 'paimon',
-            'warehouse' = 's3a://demo/',
-            'fs.s3a.access.key' = 'minioadmin',
-            'fs.s3a.secret.key' = 'minioadmin',
-            'fs.s3a.endpoint' = 'http://minio:9000',
-            'fs.s3a.path.style.access' = 'true'
+            'warehouse' = 's3://demo/',
+            's3a.access.key' = 'minioadmin',
+            's3a.secret.key' = 'minioadmin',
+            's3a.endpoint' = 'http://minio:9000',
+            's3a.path.style.access' = 'true'
         )
         """
     )
