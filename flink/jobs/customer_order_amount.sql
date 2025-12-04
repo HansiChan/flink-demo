@@ -1,4 +1,4 @@
-SET 'execution.runtime-mode' = 'batch';
+SET 'execution.runtime-mode' = 'streaming';
 SET 'table.dynamic-table-options.enabled' = 'true';
 
 CREATE CATALOG paimon WITH (
@@ -15,25 +15,29 @@ USE CATALOG paimon;
 USE ods;
 
 -- Drop the table if it exists to ensure schema is updated
-DROP TABLE IF EXISTS customer_total_orders;
+DROP TABLE IF EXISTS daily_customer_summary;
 
--- Create a table to store the aggregated customer order amounts
-CREATE TABLE IF NOT EXISTS customer_total_orders (
+-- Create a partitioned table to store the daily aggregated customer order amounts
+CREATE TABLE IF NOT EXISTS daily_customer_summary (
     customer_id INT,
     customer_name STRING,
     total_amount DECIMAL(10, 2),
-    PRIMARY KEY (customer_id) NOT ENFORCED
-);
+    dt DATE,  -- Partition key
+    PRIMARY KEY (dt, customer_id) NOT ENFORCED
+) PARTITIONED BY (dt);
 
--- Insert the aggregated customer order amounts into the new table
-INSERT INTO customer_total_orders
+-- Insert the aggregated daily customer order amounts into the new partitioned table
+INSERT INTO daily_customer_summary
 SELECT
     c.customer_id,
     c.customer_name,
-    SUM(o.amount) AS total_amount
+    SUM(o.amount) AS total_amount,
+    CAST(o.order_date AS DATE) AS dt
 FROM
     ods.ods_customers AS c
 JOIN
     ods.ods_orders AS o ON c.customer_id = o.customer_id
 GROUP BY
-    c.customer_id, c.customer_name;
+    CAST(o.order_date AS DATE),
+    c.customer_id,
+    c.customer_name;
