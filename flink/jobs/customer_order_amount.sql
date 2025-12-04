@@ -9,6 +9,8 @@ CREATE CATALOG paimon WITH (
 
 USE CATALOG paimon;
 
+USE ods;
+
 -- Create a view of the ods_orders table
 CREATE TEMPORARY VIEW ods_orders_view AS
 SELECT
