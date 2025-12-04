@@ -95,7 +95,7 @@ services:
         ipv4_address: 172.16.0.4
 
   starrocks:
-    image: starrocks/allinone-ubuntu:3.2-lts
+    image: starrocks/allinone-ubuntu
     container_name: starrocks
     networks:
       demo:
