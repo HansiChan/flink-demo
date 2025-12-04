@@ -104,5 +104,16 @@ FROM TABLE(
         DESCRIPTOR(order_ts),
         INTERVAL '10' MINUTES
     )
-) AS tw
+) AS tw (
+    order_id,
+    customer_id,
+    amount,
+    status,
+    order_ts,
+    customer_name,
+    region,
+    window_start,
+    window_end,
+    window_time
+)
 GROUP BY tw.window_start, tw.window_end, tw.customer_id;
