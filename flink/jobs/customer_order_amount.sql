@@ -14,26 +14,26 @@ USE CATALOG paimon;
 
 USE ods;
 
--- Create a new table to store the aggregated results
-CREATE TABLE IF NOT EXISTS customer_order_summary (
+-- Drop the table if it exists to ensure schema is updated
+DROP TABLE IF EXISTS customer_total_orders;
+
+-- Create a table to store the aggregated customer order amounts
+CREATE TABLE IF NOT EXISTS customer_total_orders (
     customer_id INT,
+    customer_name STRING,
     total_amount DECIMAL(10, 2),
     PRIMARY KEY (customer_id) NOT ENFORCED
-) WITH (
-    'connector' = 'paimon',
-    'changelog-producer' = 'input',
-    'file.format' = 'parquet'
 );
 
--- a sql that calculate total order amount for each customer
-INSERT INTO customer_order_summary
+-- Insert the aggregated customer order amounts into the new table
+INSERT INTO customer_total_orders
 SELECT
     c.customer_id,
+    c.customer_name,
     SUM(o.amount) AS total_amount
 FROM
-    ods_customers /*+ OPTIONS('scan.mode'='latest-full') */ AS c
+    ods.ods_customers AS c
 JOIN
-    ods_orders    /*+ OPTIONS('scan.mode'='latest-full') */ AS o
-ON c.customer_id = o.customer_id
+    ods.ods_orders AS o ON c.customer_id = o.customer_id
 GROUP BY
-    c.customer_id;
+    c.customer_id, c.customer_name;
