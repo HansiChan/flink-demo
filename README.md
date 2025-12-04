@@ -29,9 +29,9 @@ docker compose up -d --build  # 首次启动时构建镜像
   - SQL Server：`docker compose up -d mssql`
   - MinIO：`docker compose up -d minio`
   - SeaTunnel 集群：`docker compose up -d master worker1 worker2`
-  - StarRocks：`./seatunnel/script/start_starrocks.sh`
+  - StarRocks：`docker compose up -d starrocks`
 - 停止单个组件：`docker compose stop mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
-- 停止 StarRocks：`./seatunnel/script/stop_starrocks.sh`
+- 停止 StarRocks：`docker compose stop starrocks`
 - 停止并清理：`docker compose down -v`
 - 查看日志：`docker compose logs -f mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
 - 进入容器：
@@ -62,6 +62,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SeaTunnel：
   - REST（默认 5801 暴露自 Master）
   - 运行任务：`sh seatunnel/script/start_task.sh`（使用脚本启动 SQLServer -> Paimon 作业）
+  - 停止任务：`docker exec -it seatunnel_client ./bin/seatunnel.sh -can`
 
 ## SeaTunnel 说明
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`），容器启动时会拉起 engine 并跟随日志。
