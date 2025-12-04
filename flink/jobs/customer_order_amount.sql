@@ -34,8 +34,9 @@ SELECT
     c.customer_id,
     SUM(o.amount) AS total_amount
 FROM
-    ods_customers c
+    ods_customers /*+ OPTIONS('scan.mode'='latest-full') */ AS c
 JOIN
-    ods_orders o ON c.customer_id = o.customer_id
+    ods_orders    /*+ OPTIONS('scan.mode'='latest-full') */ AS o
+ON c.customer_id = o.customer_id
 GROUP BY
     c.customer_id;
