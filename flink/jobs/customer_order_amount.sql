@@ -1,3 +1,5 @@
+SET 'execution.runtime-mode' = 'streaming';
+
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
     'warehouse' = 's3://demo/',
@@ -11,39 +13,14 @@ USE CATALOG paimon;
 
 USE ods;
 
--- Create a view of the ods_orders table
-CREATE TEMPORARY VIEW ods_orders_view AS
-SELECT
-    *
-FROM
-    ods_orders;
-
--- Create a view of the ods_customers table
-CREATE TEMPORARY VIEW ods_customers_view AS
-SELECT
-    *
-FROM
-    ods_customers;
-
--- Create a new table to store the aggregated results
-CREATE TABLE IF NOT EXISTS customer_order_summary (
-    customer_id INT,
-    total_amount DECIMAL(10, 2),
-    PRIMARY KEY (customer_id) NOT ENFORCED
-) WITH (
-    'connector' = 'paimon',
-    'changelog-producer' = 'full-compaction',
-    'file.format' = 'parquet'
-);
-
 -- a sql that calculate total order amount for each customer
 INSERT INTO customer_order_summary
 SELECT
     c.customer_id,
     SUM(o.amount) AS total_amount
 FROM
-    ods_customers_view c
+    ods_customers c
 JOIN
-    ods_orders_view o ON c.customer_id = o.customer_id
+    ods_orders o ON c.customer_id = o.customer_id
 GROUP BY
     c.customer_id;
