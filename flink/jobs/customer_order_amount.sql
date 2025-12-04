@@ -1,9 +1,6 @@
 SET 'execution.runtime-mode' = 'streaming';
 SET 'table.dynamic-table-options.enabled' = 'true';
 
-ALTER TABLE ods_orders SET ('scan.mode' = 'latest-full');
-ALTER TABLE ods_customers SET ('scan.mode' = 'latest-full');
-
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
     'warehouse' = 's3://demo/',
@@ -16,6 +13,9 @@ CREATE CATALOG paimon WITH (
 USE CATALOG paimon;
 
 USE ods;
+
+ALTER TABLE ods_orders SET ('scan.mode' = 'latest-full');
+ALTER TABLE ods_customers SET ('scan.mode' = 'latest-full');
 
 -- Create a new table to store the aggregated results
 CREATE TABLE IF NOT EXISTS customer_order_summary (
