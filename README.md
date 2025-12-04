@@ -98,7 +98,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` （与 Flink 1.20.1 兼容，如 `paimon-flink-1.20-*.jar`）。
 - 提交作业（Streaming Mode）:
   ```bash
-  docker compose exec flink-client ./bin/sql-client.sh -f /opt/flink/usrlib/customer_order_amount.sql
+  docker compose exec flink-client ./bin/sql-client.sh -f /opt/flink/usrjob/customer_order_amount.sql
   ```
   此命令将以流模式提交 SQL 作业。停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
 

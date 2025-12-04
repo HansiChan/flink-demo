@@ -144,8 +144,8 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
     volumes:
-      - ./flink/jobs:/opt/flink/usrlib
-      - ./flink/lib:/opt/flink/lib
+      - ./flink/jobs:/opt/flink/usrjob
+      - ./flink/flink-plugins:/opt/flink/lib/userlib
 
   flink-client:
     image: flink:1.20.1-scala_2.12-java11
@@ -156,8 +156,8 @@ services:
       - jobmanager
     command: bash -c "sleep 3600"
     volumes:
-      - ./flink/jobs:/opt/flink/usrlib
-      - ./flink/lib:/opt/flink/lib
+      - ./flink/jobs:/opt/flink/usrjob
+      - ./flink/flink-plugins:/opt/flink/lib/userlib
 
 networks:
   demo:
