@@ -1,10 +1,10 @@
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
-    'warehouse' = 's3a://demo/ods',
-    'fs.s3a.access-key' = 'minioadmin',
-    'fs.s3a.secret-key' = 'minioadmin',
-    'fs.s3a.endpoint' = 'http://minio:9000',
-    'fs.s3a.path.style.access' = 'true'
+    'warehouse' = 's3://demo/ods',
+    's3.access-key' = 'minioadmin',
+    's3.secret-key' = 'minioadmin',
+    's3.endpoint' = 'http://minio:9000',
+    's3.path.style.access' = 'true'
 );
 
 USE CATALOG paimon;
