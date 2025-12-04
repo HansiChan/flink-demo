@@ -147,14 +147,16 @@ services:
       - ./flink/jobs:/opt/flink/usrjob
       - ./flink/flink-plugins:/opt/flink/lib/userlib
 
-  flink-client:
-    image: flink:1.20.1-scala_2.12-java11
-    container_name: flink_client
-    networks:
-      - demo
+  sql-client:
+    image: flink:latest
+    command: bin/sql-client.sh
     depends_on:
       - jobmanager
-    command: bash -c "sleep 3600"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager 
     volumes:
       - ./flink/jobs:/opt/flink/usrjob
       - ./flink/flink-plugins:/opt/flink/lib/userlib
