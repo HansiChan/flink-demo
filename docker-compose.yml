@@ -96,9 +96,10 @@ services:
         ipv4_address: 172.16.0.4
 
   flink-jobmanager:
-    image: flink:1.18
+    build: ./flink
+    image: flink-python:1.18
     container_name: flink_jobmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && python3_path=$(command -v python3) && ln -sf \"$python3_path\" /usr/bin/python3 || true; exec /docker-entrypoint.sh jobmanager"]
+    command: jobmanager
     hostname: jobmanager
     ports:
       - "8081:8081"
@@ -114,9 +115,10 @@ services:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
 
   flink-taskmanager:
-    image: flink:1.18
+    build: ./flink
+    image: flink-python:1.18
     container_name: flink_taskmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && python3_path=$(command -v python3) && ln -sf \"$python3_path\" /usr/bin/python3 || true; exec /docker-entrypoint.sh taskmanager"]
+    command: taskmanager
     depends_on:
       - flink-jobmanager
     environment:
