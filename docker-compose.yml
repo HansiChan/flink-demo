@@ -109,6 +109,8 @@ services:
         taskmanager.numberOfTaskSlots: 4
     networks:
       - demo
+    volumes:
+      - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
 
   flink-taskmanager:
     image: flink:1.18
@@ -123,6 +125,8 @@ services:
         taskmanager.numberOfTaskSlots: 4
     networks:
       - demo
+    volumes:
+      - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
 
   starrocks:
     image: starrocks/allin1-ubuntu
