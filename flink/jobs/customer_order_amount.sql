@@ -1,4 +1,8 @@
 SET 'execution.runtime-mode' = 'streaming';
+SET 'table.dynamic-table-options.enabled' = 'true';
+
+ALTER TABLE ods_orders SET ('scan.mode' = 'latest-full');
+ALTER TABLE ods_customers SET ('scan.mode' = 'latest-full');
 
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
