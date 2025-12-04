@@ -79,7 +79,8 @@ docker compose up -d --build  # 首次启动时构建镜像
 
 
 ## Flink（SQL 示例）
-- Flink JM/TM 直接使用官方 `flink:1.20.1`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrlib`。
+- Flink JM/TM 直接使用官方 `flink:1.20.1`。`jobmanager` 使用 `job-cluster` 命令启动，使集群保持运行状态以接收作业。`rest.port` 配置为 `8081` 以确保 Flink UI 可访问。
+- 本地 `flink/jobs` 挂载到容器 `/opt/flink/usrlib`。
 - 插件 jars（Paimon、S3 等）放在 `flink/lib/`，Compose 会挂载到容器 `/opt/flink/lib`。
 - 示例作业：`flink/jobs/customer_order_amount.sql`（实时聚合 `ods_orders` 和 `ods_customers`，写入 `customer_order_summary` Paimon 表）。
 
@@ -99,7 +100,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   ```bash
   docker compose exec jobmanager ./bin/sql-client.sh -f /opt/flink/usrlib/customer_order_amount.sql
   ```
-  该作业会以流模式运行。停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
+  此命令将以流模式提交 SQL 作业。停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖
