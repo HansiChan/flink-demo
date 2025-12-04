@@ -51,7 +51,7 @@ CREATE TEMPORARY TABLE watermarked_orders (
     'connector' = 'paimon',
     -- This MUST be the full physical path to the Paimon table directory in S3.
     -- Paimon creates database folders with a '.db' suffix (e.g., 'ods.db').
-    'path' = 's3a://demo/ods.db/ods_orders',
+    'path' = 's3://demo/',
     -- Must include S3 settings again as this is a separate table definition.
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
