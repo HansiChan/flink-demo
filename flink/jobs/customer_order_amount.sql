@@ -14,9 +14,6 @@ USE CATALOG paimon;
 
 USE ods;
 
-ALTER TABLE ods_orders SET ('scan.mode' = 'latest-full');
-ALTER TABLE ods_customers SET ('scan.mode' = 'latest-full');
-
 -- Create a new table to store the aggregated results
 CREATE TABLE IF NOT EXISTS customer_order_summary (
     customer_id INT,
