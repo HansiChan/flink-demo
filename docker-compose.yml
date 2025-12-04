@@ -149,6 +149,7 @@ services:
 
   sql-client:
     image: flink:latest
+    container_name: job_client
     command: bin/sql-client.sh
     depends_on:
       - jobmanager

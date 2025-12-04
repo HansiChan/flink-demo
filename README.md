@@ -87,11 +87,11 @@ docker compose up -d --build  # 首次启动时构建镜像
 ### Flink 集群启停
 - 启动 Flink 集群和客户端：
   ```bash
-  docker compose up -d jobmanager taskmanager flink-client
+  docker compose up -d jobmanager taskmanager job-client
   ```
 - 停止 Flink 集群和客户端：
   ```bash
-  docker compose stop jobmanager taskmanager flink-client
+  docker compose stop jobmanager taskmanager job-client
   ```
 
 ### 提交 Flink SQL Streaming 作业
