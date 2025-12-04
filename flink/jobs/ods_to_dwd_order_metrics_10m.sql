@@ -89,7 +89,7 @@ SELECT
     CURRENT_TIMESTAMP AS last_update
 FROM TABLE(
     TUMBLE(
-        TABLE ods_orders_enriched,
+        TABLE ods_orders,
         DESCRIPTOR(order_ts),
         INTERVAL '10' MINUTES
     )
