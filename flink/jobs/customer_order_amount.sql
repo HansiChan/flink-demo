@@ -1,4 +1,4 @@
-SET 'execution.runtime-mode' = 'streaming';
+SET 'execution.runtime-mode' = 'batch';
 SET 'table.dynamic-table-options.enabled' = 'true';
 
 CREATE CATALOG paimon WITH (
