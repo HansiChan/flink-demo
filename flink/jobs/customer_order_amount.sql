@@ -28,7 +28,7 @@ FROM
 -- Create a new table to store the aggregated results
 CREATE TABLE IF NOT EXISTS customer_order_summary (
     customer_id INT,
-    total_order_amount DECIMAL(10, 2),
+    total_amount DECIMAL(10, 2),
     PRIMARY KEY (customer_id) NOT ENFORCED
 ) WITH (
     'connector' = 'paimon',
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS customer_order_summary (
 INSERT INTO customer_order_summary
 SELECT
     c.customer_id,
-    SUM(o.order_amount) AS total_order_amount
+    SUM(o.amount) AS total_amount
 FROM
     ods_customers_view c
 JOIN
