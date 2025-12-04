@@ -97,7 +97,7 @@ services:
 
   flink-jobmanager:
     build: ./flink
-    image: flink-python:1.20.2
+    image: flink:1.20.2
     container_name: flink_jobmanager
     command: jobmanager
     hostname: jobmanager
@@ -119,7 +119,7 @@ services:
 
   flink-taskmanager:
     build: ./flink
-    image: flink-python:1.20.2
+    image: flink:1.20.2
     container_name: flink_taskmanager
     command: taskmanager
     depends_on:
