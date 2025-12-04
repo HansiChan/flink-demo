@@ -21,6 +21,7 @@ docker compose up -d --build  # 首次启动时构建镜像
 - SQL Server: localhost:1433（SA 密码见 `.env`）
 - MinIO: S3 API http://localhost:9000，控制台 http://localhost:9001（默认账号 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`）
 - SeaTunnel 集群：Master (REST 5801) + Worker1 + Worker2，用户配置挂载 `seatunnel/config`
+- StarRocks: FE HTTP 8030、BE HTTP 8040、FE MySQL 协议 9030（对应 compose 的 `starrocks` 服务）
 
 ## 常用操作
 - 启动全部：`docker compose up -d --build`
@@ -28,7 +29,9 @@ docker compose up -d --build  # 首次启动时构建镜像
   - SQL Server：`docker compose up -d mssql`
   - MinIO：`docker compose up -d minio`
   - SeaTunnel 集群：`docker compose up -d master worker1 worker2`
+  - StarRocks：`./seatunnel/script/start_starrocks.sh`
 - 停止单个组件：`docker compose stop mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
+- 停止 StarRocks：`./seatunnel/script/stop_starrocks.sh`
 - 停止并清理：`docker compose down -v`
 - 查看日志：`docker compose logs -f mssql`（或 `minio` / `seatunnel` / `seatunnel-worker1` / `seatunnel-worker2`）
 - 进入容器：
@@ -37,6 +40,7 @@ docker compose up -d --build  # 首次启动时构建镜像
   - SeaTunnel Master：`docker compose exec seatunnel /bin/bash`
   - SeaTunnel Worker1：`docker compose exec seatunnel-worker1 /bin/bash`
   - SeaTunnel Worker2：`docker compose exec seatunnel-worker2 /bin/bash`
+  - StarRocks：`docker compose exec starrocks /bin/bash`
 
 ## SQL Server ODS 说明
 - `mssql/ods_seed.sql` 会在容器启动时创建 `ods` 数据库并写入演示表：`ods_customers` 与 `ods_orders`（含外键，可 join），作为后续 ETL 的 ODS 数据源，并为两张表开启 CDC（Change Data Capture）。
@@ -57,17 +61,17 @@ docker compose up -d --build  # 首次启动时构建镜像
 - MinIO 控制台：浏览器打开 `http://localhost:9001`
 - SeaTunnel：
   - REST（默认 5801 暴露自 Master）
-  - 运行任务：`docker compose exec master ./bin/seatunnel.sh --config /opt/seatunnel/config/user_config/sqlserver_to_paimon.conf -m cluster`
+  - 运行任务：`sh seatunnel/script/start_task.sh`（使用脚本启动 SQLServer -> Paimon 作业）
 
 ## SeaTunnel 说明
 - 镜像使用 `apache/seatunnel:2.3.12`，已挂载本地配置目录 `seatunnel/config`（映射到 `/opt/config/user_config`），容器启动时会拉起 engine 并跟随日志。
-- 默认启动 engine，容器内可运行作业：  
-  `docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/seatunnel.conf -m local`
+- 默认启动 engine，需要运行作业时使用脚本：  
+  `sh seatunnel/script/start_task.sh`
 - 示例配置：
   - `seatunnel/config/seatunnel.conf`：FakeSource -> Console。
   - `seatunnel/config/sqlserver_to_paimon.conf`：SQL Server CDC 多表（`ods_customers`、`ods_orders`）写入 MinIO 上的 Paimon，按 SeaTunnel 2.3.12 多表示例配置。
     - 依赖环境变量：`MSSQL_SA_PASSWORD`、`MINIO_ROOT_USER`、`MINIO_ROOT_PASSWORD`、`PAIMON_BUCKET`（默认 `paimon-warehouse`）。
-    - 运行示例：`docker compose exec seatunnel ./bin/seatunnel.sh --config /opt/config/user_config/sqlserver_to_paimon.conf -m local`
+    - 运行示例：`sh seatunnel/script/start_task.sh`
     - 请先在 MinIO 创建桶 `${PAIMON_BUCKET}`（默认 `paimon-warehouse`），例如：
       - `docker compose exec minio mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`
       - `docker compose exec minio mc mb local/$PAIMON_BUCKET`

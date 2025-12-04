@@ -94,6 +94,28 @@ services:
       demo:
         ipv4_address: 172.16.0.4
 
+  starrocks:
+    image: starrocks/allinone-ubuntu:3.2-lts
+    container_name: starrocks
+    networks:
+      demo:
+        ipv4_address: 172.16.0.20
+    environment:
+      - FE_SERVERS=fe1:172.16.0.20:9010
+      - BE_ADDR=172.16.0.20:9050
+    ports:
+      - "8030:8030"   # FE http
+      - "8040:8040"   # BE http
+      - "9030:9030"   # FE MySQL protocol
+    volumes:
+      - starrocks-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8030/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 networks:
   demo:
     driver: bridge
@@ -104,3 +126,4 @@ networks:
 volumes:
   mssql-data:
   minio-data:
+  starrocks-data:
