@@ -113,9 +113,6 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      # 将插件同时挂载到 plugins 和 lib，确保类路径可见
-      - ./flink/flink-plugins:/opt/flink/plugins:ro
-      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   flink-taskmanager:
     build: ./flink
@@ -134,9 +131,6 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      # 将插件同时挂载到 plugins 和 lib，确保类路径可见
-      - ./flink/flink-plugins:/opt/flink/plugins:ro
-      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   starrocks:
     image: starrocks/allin1-ubuntu
