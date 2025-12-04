@@ -108,8 +108,7 @@ services:
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
     networks:
-      demo:
-        ipv4_address: 172.16.0.5
+      - demo
 
   flink-taskmanager:
     image: flink:1.18
@@ -123,8 +122,7 @@ services:
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
     networks:
-      demo:
-        ipv4_address: 172.16.0.6
+      - demo
 
   starrocks:
     image: starrocks/allin1-ubuntu
