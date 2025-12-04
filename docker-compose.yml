@@ -113,6 +113,8 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
+      - ./flink/flink-plugins:/opt/flink/plugins:ro
+      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   flink-taskmanager:
     build: ./flink
@@ -131,6 +133,8 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
+      - ./flink/flink-plugins:/opt/flink/plugins:ro
+      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   starrocks:
     image: starrocks/allin1-ubuntu
