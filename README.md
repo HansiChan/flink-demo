@@ -95,16 +95,11 @@ docker compose up -d --build  # 首次启动时构建镜像
 
 ### 提交 Flink SQL Streaming 作业
 - 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` （与 Flink 1.20.1 兼容，如 `paimon-flink-1.20-*.jar`）。
-- 提交作业（Streaming Mode）：
+- 提交作业（Streaming Mode）:
   ```bash
-  docker compose exec jobmanager ./bin/flink run \
-    -t remote \
-    -sa "jobmanager:8081" \
-    -Dexecution.runtime-mode=STREAMING \
-    -Dpipeline.jars=file:///opt/flink/lib/paimon-flink-1.20-0.8.0.jar \
-    -f /opt/flink/usrlib/customer_order_amount.sql
+  docker compose exec jobmanager ./bin/sql-client.sh -f /opt/flink/usrlib/customer_order_amount.sql
   ```
-  停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
+  该作业会以流模式运行。停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
 
 ## 扩展思路
 - 在 `app/main.py` 中添加业务路由；按需调整依赖

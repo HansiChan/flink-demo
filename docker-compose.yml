@@ -125,15 +125,13 @@ services:
       - demo
     ports:
       - "8081:8081"
-    command: jobmanager
+    command: standalone-job --detached
     environment:
       - |
-        jobmanager.rpc.address=jobmanager
+        FLINK_PROPERTIES=jobmanager.rpc.address: jobmanager
     volumes:
       - ./flink/jobs:/opt/flink/usrlib
-      - ./flink/flink-plugins:/opt/flink/plugins/user_plugins
-      - ./flink/flink-plugins:/opt/flink/lib/user_lib
-
+      - ./flink/flink-plugins:/opt/flink/lib/userlib
 
   taskmanager:
     image: flink:1.20.1-scala_2.12-java11
@@ -145,29 +143,11 @@ services:
     command: taskmanager
     environment:
       - |
-        jobmanager.rpc.address=jobmanager
+        FLINK_PROPERTIES=jobmanager.rpc.address: jobmanager
     volumes:
       - ./flink/jobs:/opt/flink/usrlib
-      - ./flink/flink-plugins:/opt/flink/plugins/user_plugins
-      - ./flink/flink-plugins:/opt/flink/lib/user_lib
+      - ./flink/flink-plugins:/opt/flink/lib/userlib
 
-
-  sql-gateway:
-    image: flink:1.20.1-scala_2.12-java11
-    container_name: flink_sql_gateway
-    networks:
-      - demo
-    depends_on:
-      - jobmanager
-    ports:
-      - "8083:8083"
-    command: sql-gateway -Dsql-gateway.endpoint.rest.address=0.0.0.0
-    environment:
-      - |
-        jobmanager.rpc.address=jobmanager
-    volumes:
-      - ./flink/jobs:/opt/flink/usrlib
-      - ./flink/flink-plugins:/opt/flink/plugins
 
 networks:
   demo:
