@@ -78,23 +78,31 @@ docker compose up -d --build  # 首次启动时构建镜像
       - `docker compose exec minio mc mb local/$PAIMON_BUCKET`
 
 
-## Flink（PyFlink 示例）
-- Flink JM/TM 直接使用官方 `flink:1.20.2`，在容器启动时通过 entrypoint 安装 `python3`/`pip`/`venv` 并 `pip install apache-flink==1.20.2`，`PYFLINK_CLIENT_EXECUTABLE=python3`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
-- 插件 jars（Paimon、S3 等）放在 `flink/flink-plugins/`，Compose 会挂载到容器 `/opt/flink/plugins` 和 `/opt/flink/lib`，已在 `.gitignore` 排除。
-- 示例作业：`flink/jobs/ods_user_total_spend.py`（实时聚合 `ods_orders`，写入 `user_total_spend`）。
-- 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` 或 `/opt/flink/plugins`（与 Flink 1.20.2 兼容，如 `paimon-flink-1.20-*.jar`、`flink-s3-fs-*.jar`）。
-- 启动并提交作业：
-  ```bash
-  docker compose build flink-jobmanager flink-taskmanager
-  docker compose up -d flink-jobmanager flink-taskmanager
-  # 显式指定 Python 可执行文件（参考官方示例）
-  docker compose exec flink-jobmanager ./bin/flink run \
-    -py /opt/flink/usrtmp/jobs/ods_user_total_spend.py \
-    -pyexec /opt/venv/bin/python3 \
-    -d
+## Flink（SQL 示例）
+- Flink JM/TM 直接使用官方 `flink:1.20.1`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrlib`。
+- 插件 jars（Paimon、S3 等）放在 `flink/lib/`，Compose 会挂载到容器 `/opt/flink/lib`。
+- 示例作业：`flink/jobs/customer_order_amount.sql`（实时聚合 `ods_orders` 和 `ods_customers`，写入 `customer_order_summary` Paimon 表）。
 
-  # 或直接使用封装脚本：
-  docker compose exec flink-jobmanager /opt/flink/usrtmp/jobs/run_ods_user_total_spend.sh
+### Flink 集群启停
+- 启动 Flink 集群：
+  ```bash
+  docker compose up -d jobmanager taskmanager
+  ```
+- 停止 Flink 集群：
+  ```bash
+  docker compose stop jobmanager taskmanager
+  ```
+
+### 提交 Flink SQL Streaming 作业
+- 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib` （与 Flink 1.20.1 兼容，如 `paimon-flink-1.20-*.jar`）。
+- 提交作业（Streaming Mode）：
+  ```bash
+  docker compose exec jobmanager ./bin/flink run \
+    -t remote \
+    -sa "jobmanager:8081" \
+    -Dexecution.runtime-mode=STREAMING \
+    -Dpipeline.jars=file:///opt/flink/lib/paimon-flink-1.20-0.8.0.jar \
+    -f /opt/flink/usrlib/customer_order_amount.sql
   ```
   停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
 

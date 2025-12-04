@@ -95,44 +95,6 @@ services:
       demo:
         ipv4_address: 172.16.0.4
 
-  flink-jobmanager:
-    image: flink:1.20.2
-    container_name: flink_jobmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-venv && python3 -m pip install --no-cache-dir apache-flink==1.20.2 && exec /docker-entrypoint.sh jobmanager"]
-    hostname: jobmanager
-    ports:
-      - "8081:8081"
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 4
-      - PYFLINK_CLIENT_EXECUTABLE=python3
-    networks:
-      - demo
-    volumes:
-      - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      - ./flink/flink-plugins:/opt/flink/plugins:ro
-      - ./flink/flink-plugins:/opt/flink/lib:ro
-
-  flink-taskmanager:
-    image: flink:1.20.2
-    container_name: flink_taskmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-venv && python3 -m pip install --no-cache-dir apache-flink==1.20.2 && exec /docker-entrypoint.sh taskmanager"]
-    depends_on:
-      - flink-jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 4
-      - PYFLINK_CLIENT_EXECUTABLE=python3
-    networks:
-      - demo
-    volumes:
-      - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      - ./flink/flink-plugins:/opt/flink/plugins:ro
-      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   starrocks:
     image: starrocks/allin1-ubuntu
@@ -155,6 +117,57 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+
+  jobmanager:
+    image: flink:1.20.1-scala_2.12-java11
+    container_name: flink_jobmanager
+    networks:
+      - demo
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - |
+        jobmanager.rpc.address=jobmanager
+    volumes:
+      - ./flink/jobs:/opt/flink/usrlib
+      - ./flink/flink-plugins:/opt/flink/plugins/user_plugins
+      - ./flink/flink-plugins:/opt/flink/lib/user_lib
+
+
+  taskmanager:
+    image: flink:1.20.1-scala_2.12-java11
+    container_name: flink_taskmanager
+    networks:
+      - demo
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - |
+        jobmanager.rpc.address=jobmanager
+    volumes:
+      - ./flink/jobs:/opt/flink/usrlib
+      - ./flink/flink-plugins:/opt/flink/plugins/user_plugins
+      - ./flink/flink-plugins:/opt/flink/lib/user_lib
+
+
+  sql-gateway:
+    image: flink:1.20.1-scala_2.12-java11
+    container_name: flink_sql_gateway
+    networks:
+      - demo
+    depends_on:
+      - jobmanager
+    ports:
+      - "8083:8083"
+    command: sql-gateway -Dsql-gateway.endpoint.rest.address=0.0.0.0
+    environment:
+      - |
+        jobmanager.rpc.address=jobmanager
+    volumes:
+      - ./flink/jobs:/opt/flink/usrlib
+      - ./flink/flink-plugins:/opt/flink/plugins
 
 networks:
   demo:
