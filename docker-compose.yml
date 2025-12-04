@@ -96,7 +96,7 @@ services:
         ipv4_address: 172.16.0.4
 
   flink-jobmanager:
-    image: flink:1.18
+    image: flink:1.18-python
     container_name: flink_jobmanager
     command: jobmanager
     hostname: jobmanager
@@ -107,13 +107,14 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
+      - PYFLINK_CLIENT_EXECUTABLE=/usr/bin/python3
     networks:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
 
   flink-taskmanager:
-    image: flink:1.18
+    image: flink:1.18-python
     container_name: flink_taskmanager
     command: taskmanager
     depends_on:
@@ -123,6 +124,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
+      - PYFLINK_CLIENT_EXECUTABLE=/usr/bin/python3
     networks:
       - demo
     volumes:
