@@ -3,8 +3,8 @@
 --
 -- =================================== IMPORTANT =====================================
 -- This script now uses a TEMPORARY TABLE ('watermarked_orders') to define the
--- watermark for the orders stream directly. This bypasses issues with metadata
--- not persisting in the Paimon catalog via ALTER TABLE.
+-- watermark for the orders stream directly. This version fixes the timestamp
+-- precision and table path issues.
 --
 -- You can run this entire script directly in the Flink SQL Client or via 'flink run'.
 -- ===================================================================================
@@ -40,18 +40,18 @@ CREATE TABLE IF NOT EXISTS dwd.customer_order_aggregation (
 CREATE TEMPORARY TABLE watermarked_orders (
     order_id INT,
     customer_id INT,
-    -- The type must match the underlying Paimon table (TIMESTAMP(7) as seen in DESCRIBE)
-    order_date TIMESTAMP(7),
+    -- Flink's watermark feature supports precision up to 3. Flink will cast on read.
+    order_date TIMESTAMP(3),
     amount DECIMAL(10, 2),
     status STRING,
-    created_at TIMESTAMP(7),
+    created_at TIMESTAMP(3),
     -- This WATERMARK definition is the key to fixing the temporal join error.
     WATERMARK FOR order_date AS order_date - INTERVAL '1' SECOND
 ) WITH (
     'connector' = 'paimon',
-    -- Provide the full physical path to the Paimon table in S3.
-    -- Paimon creates database folders with a '.db' suffix.
-    'path' = 's3://demo/',
+    -- This MUST be the full physical path to the Paimon table directory in S3.
+    -- Paimon creates database folders with a '.db' suffix (e.g., 'ods.db').
+    'path' = 's3a://demo/ods.db/ods_orders',
     -- Must include S3 settings again as this is a separate table definition.
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
