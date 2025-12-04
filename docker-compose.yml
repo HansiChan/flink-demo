@@ -132,19 +132,32 @@ services:
       - ./flink/flink-plugins:/opt/flink/lib/userlib
 
   taskmanager:
-    image: flink:1.20.2-scala_2.12-java11
+    image: flink:1.20.1-scala_2.12-java11
+    container_name: flink_taskmanager
+    networks:
+      - demo
     depends_on:
       - jobmanager
-    command: taskmanager
-    scale: 1
+    command: task-manager
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2   
     volumes:
-      - ./flink/jobs:/opt/flink/usrjob
-      - ./flink/flink-plugins:/opt/flink/lib/userlib
+      - ./flink/jobs:/opt/flink/usrlib
+      - ./flink/lib:/opt/flink/lib
+
+  flink-client:
+    image: flink:1.20.1-scala_2.12-java11
+    container_name: flink_client
+    networks:
+      - demo
+    depends_on:
+      - jobmanager
+    command: bash -c "sleep 3600"
+    volumes:
+      - ./flink/jobs:/opt/flink/usrlib
+      - ./flink/lib:/opt/flink/lib
 
 networks:
   demo:
