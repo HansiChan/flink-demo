@@ -1,4 +1,6 @@
 SET 'execution.runtime-mode' = 'streaming';
+SET 'table.dynamic-table-options.enabled' = 'true';
+SET 'table.exec.sink.upsert-materialize' = 'NONE';
 
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
