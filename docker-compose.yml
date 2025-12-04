@@ -98,7 +98,7 @@ services:
   flink-jobmanager:
     image: flink:1.18
     container_name: flink_jobmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && exec /docker-entrypoint.sh jobmanager"]
+    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && python3_path=$(command -v python3) && ln -sf \"$python3_path\" /usr/bin/python3 || true; exec /docker-entrypoint.sh jobmanager"]
     hostname: jobmanager
     ports:
       - "8081:8081"
@@ -107,7 +107,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
-      - PYFLINK_CLIENT_EXECUTABLE=/usr/bin/python3
+      - PYFLINK_CLIENT_EXECUTABLE=python3
     networks:
       - demo
     volumes:
@@ -116,7 +116,7 @@ services:
   flink-taskmanager:
     image: flink:1.18
     container_name: flink_taskmanager
-    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && exec /docker-entrypoint.sh taskmanager"]
+    entrypoint: ["/bin/sh", "-c", "apt-get update && apt-get install -y python3 && python3_path=$(command -v python3) && ln -sf \"$python3_path\" /usr/bin/python3 || true; exec /docker-entrypoint.sh taskmanager"]
     depends_on:
       - flink-jobmanager
     environment:
@@ -124,7 +124,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 4
-      - PYFLINK_CLIENT_EXECUTABLE=/usr/bin/python3
+      - PYFLINK_CLIENT_EXECUTABLE=python3
     networks:
       - demo
     volumes:

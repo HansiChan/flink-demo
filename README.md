@@ -79,12 +79,12 @@ docker compose up -d --build  # 首次启动时构建镜像
 
 
 ## Flink（PyFlink 示例）
-- Flink JM/TM 使用 `flink:1.18`，启动时自动 apt 安装 `python3`（见 compose entrypoint），本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
+- Flink JM/TM 使用 `flink:1.18`，启动时 entrypoint 会 `apt-get install -y python3` 并确保 `/usr/bin/python3` 存在，`PYFLINK_CLIENT_EXECUTABLE=python3`。本地 `flink/jobs` 挂载到容器 `/opt/flink/usrtmp/jobs`。
 - 示例作业：`flink/jobs/ods_user_total_spend.py`（实时聚合 `ods_orders`，写入 `user_total_spend`）。
 - 运行前确保 Paimon/S3 依赖 jar 存在于 `/opt/flink/lib`（如 `paimon-flink-1.18-*.jar`、`flink-s3-fs-*.jar`）。
 - 启动并提交作业：
   ```bash
-  docker compose up -d flink-jobmanager flink-taskmanager
+  docker compose up -d --force-recreate --no-deps flink-jobmanager flink-taskmanager
   docker compose exec flink-jobmanager ./bin/flink run -py /opt/flink/usrtmp/jobs/ods_user_total_spend.py -d
   ```
   停止作业可在 Flink UI（http://localhost:8081）或用 `./bin/flink list` + `./bin/flink cancel <jobId>`。
