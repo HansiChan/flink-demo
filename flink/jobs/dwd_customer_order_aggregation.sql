@@ -1,39 +1,26 @@
 -- Flink SQL Job: dwd_customer_order_aggregation
 -- Description: Aggregates customer orders from ODS to DWD layer.
-
--- ================================ ONE-TIME SETUP ==================================
--- IMPORTANT: Before running the INSERT job, you must define a watermark for the
--- 'ods.ods_orders' table. This is required for the time-based temporal join.
 --
--- Connect to the Flink SQL client and run the following command ONCE:
-/*
+-- =================================== IMPORTANT =====================================
+-- This script now uses a TEMPORARY TABLE ('watermarked_orders') to define the
+-- watermark for the orders stream directly. This bypasses issues with metadata
+-- not persisting in the Paimon catalog via ALTER TABLE.
+--
+-- You can run this entire script directly in the Flink SQL Client or via 'flink run'.
+-- ===================================================================================
 
-ALTER TABLE ods.ods_orders SET (
-    'scan.watermark.definition' = '`order_date` - INTERVAL ''1'' SECOND'
-);
-
-*/
--- After this setup, you can run the INSERT INTO statement below as a long-running job.
--- ====================================================================================
-
-
--- ############## 1. Catalog and Environment Setup ##############
--- Create a Paimon catalog to connect to the data lakehouse on MinIO.
--- The warehouse path 's3a://demo/' assumes Paimon data is in a bucket named 'demo'.
+-- ############## 1. Catalog and DWD Table Setup ##############
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
-    'warehouse' = 's3://demo/',
+    'warehouse' = 's3a://demo/',
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
     's3.secret-key' = 'minioadmin',
     's3.path.style.access' = 'true'
 );
 
--- Switch to the Paimon catalog for the current session.
 USE CATALOG paimon;
 
--- The DWD database and target table should be created during the setup.
--- You can also run these commands in the SQL client if needed.
 CREATE DATABASE IF NOT EXISTS dwd;
 
 CREATE TABLE IF NOT EXISTS dwd.customer_order_aggregation (
@@ -47,10 +34,34 @@ CREATE TABLE IF NOT EXISTS dwd.customer_order_aggregation (
 );
 
 
--- ############## 2. Define and Execute Streaming Aggregation Logic ##############
--- This is the core transformation logic that should be submitted as a Flink job.
--- It performs a streaming join, aggregates results over a 10-minute window,
--- and inserts them into the DWD table.
+-- ############## 2. Define a Watermarked Source Table (WORKAROUND) ##############
+-- Create a TEMPORARY table that points to the physical Paimon 'ods_orders' table
+-- but explicitly defines the watermark for Flink's stream planner.
+CREATE TEMPORARY TABLE watermarked_orders (
+    order_id INT,
+    customer_id INT,
+    -- The type must match the underlying Paimon table (TIMESTAMP(7) as seen in DESCRIBE)
+    order_date TIMESTAMP(7),
+    amount DECIMAL(10, 2),
+    status STRING,
+    created_at TIMESTAMP(7),
+    -- This WATERMARK definition is the key to fixing the temporal join error.
+    WATERMARK FOR order_date AS order_date - INTERVAL '1' SECOND
+) WITH (
+    'connector' = 'paimon',
+    -- Provide the full physical path to the Paimon table in S3.
+    -- Paimon creates database folders with a '.db' suffix.
+    'path' = 's3a://demo/ods.db/ods_orders',
+    -- Must include S3 settings again as this is a separate table definition.
+    's3.endpoint' = 'http://minio:9000',
+    's3.access-key' = 'minioadmin',
+    's3.secret-key' = 'minioadmin',
+    's3.path.style.access' = 'true'
+);
+
+
+-- ############## 3. Define and Execute Streaming Aggregation Logic ##############
+-- The query is the same as before, but it reads from our new temporary table.
 INSERT INTO dwd.customer_order_aggregation
 SELECT
     -- Grouping keys
@@ -63,9 +74,10 @@ SELECT
     TUMBLE_START(o.order_date, INTERVAL '10' MINUTE) AS window_start,
     TUMBLE_END(o.order_date, INTERVAL '10' MINUTE) AS window_end
 FROM
-    -- The temporal join now works because the watermark is defined on 'ods_orders'.
-    ods.ods_orders AS o
+    -- Use the new 'watermarked_orders' temporary table as the left side of the join.
+    watermarked_orders AS o
 JOIN
+    -- The customers table can still be read directly from the catalog.
     ods.ods_customers FOR SYSTEM_TIME AS OF o.order_date AS c
     ON o.customer_id = c.customer_id
 GROUP BY
