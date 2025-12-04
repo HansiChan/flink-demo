@@ -95,6 +95,37 @@ services:
       demo:
         ipv4_address: 172.16.0.4
 
+  flink-jobmanager:
+    image: flink:1.18
+    container_name: flink_jobmanager
+    command: jobmanager
+    hostname: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    networks:
+      demo:
+        ipv4_address: 172.16.0.5
+
+  flink-taskmanager:
+    image: flink:1.18
+    container_name: flink_taskmanager
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    networks:
+      demo:
+        ipv4_address: 172.16.0.6
+
   starrocks:
     image: starrocks/allin1-ubuntu
     container_name: starrocks
