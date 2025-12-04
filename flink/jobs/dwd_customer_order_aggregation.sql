@@ -8,7 +8,7 @@
 -- Please ensure the Flink cluster has the correct S3 filesystem jars (flink-s3-fs-hadoop) available.
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
-    'warehouse' = 's3a://warehouse/',
+    'warehouse' = 's3://demo/',
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
     's3.secret-key' = 'minioadmin',
