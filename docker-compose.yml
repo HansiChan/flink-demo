@@ -97,7 +97,7 @@ services:
 
   flink-jobmanager:
     build: ./flink
-    image: flink-python:1.18
+    image: flink-python:1.20.2
     container_name: flink_jobmanager
     command: jobmanager
     hostname: jobmanager
@@ -113,11 +113,13 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      - ./flink/flink-plugins:/opt/flink/lib/plugins:ro
+      # 将插件同时挂载到 plugins 和 lib，确保类路径可见
+      - ./flink/flink-plugins:/opt/flink/plugins:ro
+      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   flink-taskmanager:
     build: ./flink
-    image: flink-python:1.18
+    image: flink-python:1.20.2
     container_name: flink_taskmanager
     command: taskmanager
     depends_on:
@@ -132,7 +134,9 @@ services:
       - demo
     volumes:
       - ./flink/jobs:/opt/flink/usrtmp/jobs:ro
-      - ./flink/flink-plugins:/opt/flink/lib/plugins:ro
+      # 将插件同时挂载到 plugins 和 lib，确保类路径可见
+      - ./flink/flink-plugins:/opt/flink/plugins:ro
+      - ./flink/flink-plugins:/opt/flink/lib:ro
 
   starrocks:
     image: starrocks/allin1-ubuntu
