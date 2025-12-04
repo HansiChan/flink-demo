@@ -75,16 +75,16 @@ CREATE TABLE IF NOT EXISTS dwd.customer_order_metrics_10m (
 
 INSERT INTO dwd.customer_order_metrics_10m
 SELECT
-    window_start,
-    window_end,
-    CAST(window_start AS DATE) AS dt,
-    customer_id,
-    ANY_VALUE(customer_name) AS customer_name,
-    ANY_VALUE(region) AS region,
+    tw.window_start,
+    tw.window_end,
+    CAST(tw.window_start AS DATE) AS dt,
+    tw.customer_id,
+    ANY_VALUE(tw.customer_name) AS customer_name,
+    ANY_VALUE(tw.region) AS region,
     COUNT(*) AS order_cnt,
-    SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) AS paid_cnt,
-    SUM(amount) AS total_amount,
-    SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS paid_amount,
+    SUM(CASE WHEN tw.status = 'paid' THEN 1 ELSE 0 END) AS paid_cnt,
+    SUM(tw.amount) AS total_amount,
+    SUM(CASE WHEN tw.status = 'paid' THEN tw.amount ELSE 0 END) AS paid_amount,
     CURRENT_TIMESTAMP AS last_update
 FROM TABLE(
     TUMBLE(
@@ -104,5 +104,5 @@ FROM TABLE(
         DESCRIPTOR(order_ts),
         INTERVAL '10' MINUTES
     )
-)
-GROUP BY window_start, window_end, customer_id;
+) AS tw
+GROUP BY tw.window_start, tw.window_end, tw.customer_id;
