@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS dwd.order_metrics_10m (
 -- Insert aggregation result
 INSERT INTO dwd.order_metrics_10m
 SELECT
-    TUMBLE_START(o.order_date, INTERVAL '10' MINUTES) AS window_start,
-    TUMBLE_END(o.order_date, INTERVAL '10' MINUTES) AS window_end,
+    TUMBLE_START(o.event_time, INTERVAL '10' MINUTES) AS window_start,
+    TUMBLE_END(o.event_time, INTERVAL '10' MINUTES) AS window_end,
     o.customer_id,
     MAX(c.customer_name) AS customer_name,
     MAX(c.region) AS region,
@@ -71,10 +71,10 @@ SELECT
     COUNT(CASE WHEN o.status = 'paid' THEN 1 END) AS paid_order_count,
     SUM(o.amount) AS total_amount,
     SUM(CASE WHEN o.status = 'paid' THEN o.amount ELSE 0 END) AS paid_amount,
-    DATE_FORMAT(TUMBLE_START(o.order_date, INTERVAL '10' MINUTES), 'yyyy-MM-dd') AS dt
+    DATE_FORMAT(TUMBLE_START(o.event_time, INTERVAL '10' MINUTES), 'yyyy-MM-dd') AS dt
 FROM ods_orders_with_watermark AS o
 JOIN ods.ods_customers AS c
     ON o.customer_id = c.customer_id
 GROUP BY
-    TUMBLE(o.order_date, INTERVAL '10' MINUTES),
+    TUMBLE(o.event_time, INTERVAL '10' MINUTES),
     o.customer_id;
