@@ -15,7 +15,7 @@ show databases;
 use ods;
 show tables;
 
-select * from paimon_catalog_fs.ods.ods_orders where order_id=2;
+select * from paimon_catalog_fs.ods.ods_orders where order_id=1;
 select count(*) from paimon_catalog_fs.ods.ods_orders;
 
 
@@ -24,3 +24,5 @@ select count(*) from paimon_catalog_fs.ods.customer_order_summary;
 create database demo_db;
 use demo_db;
 
+create view ods_orders_vw as 
+select * from paimon_catalog_fs.ods.ods_orders;

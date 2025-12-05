@@ -1,0 +1,1 @@
+docker exec seatunnel_client bin/seatunnel.sh -can ${job_id}
