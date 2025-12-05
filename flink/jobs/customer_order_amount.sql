@@ -34,37 +34,22 @@ CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
     'changelog-producer' = 'input'
 );
 
--- 创建带有时间属性的视图
-CREATE TEMPORARY VIEW orders_with_watermark AS
-SELECT
-    order_id,
-    customer_id,
-    order_date,
-    amount,
-    status,
-    created_at,
-    order_date AS event_time,
-    WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
-FROM ods.ods_orders;
-
 -- 执行聚合任务：统计每个客户每小时的订单指标
+-- 使用DATE_FORMAT将时间截断到小时级别进行聚合
 INSERT INTO dwd.dwd_customer_order_hourly_metrics
 SELECT
     c.customer_id,
     c.customer_name,
     c.region,
-    window_start,
-    window_end,
+    DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00') AS window_start,
+    DATE_FORMAT(o.order_date + INTERVAL '1' HOUR, 'yyyy-MM-dd HH:00:00') AS window_end,
     COUNT(o.order_id) AS order_count,
     SUM(o.amount) AS total_amount
-FROM TABLE(
-    TUMBLE(TABLE orders_with_watermark, DESCRIPTOR(event_time), INTERVAL '1' HOUR)
-) o
+FROM ods.ods_orders o
 INNER JOIN ods.ods_customers c
     ON o.customer_id = c.customer_id
 GROUP BY
     c.customer_id,
     c.customer_name,
     c.region,
-    o.window_start,
-    o.window_end;
+    DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00');
