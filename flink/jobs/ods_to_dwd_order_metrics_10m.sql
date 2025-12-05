@@ -25,12 +25,12 @@ CREATE DATABASE IF NOT EXISTS dwd;
 
 -- Create temporary table to add watermark on top of Paimon table
 CREATE TEMPORARY TABLE ods_orders_with_watermark (
-    order_id INT,
-    customer_id INT,
-    order_date TIMESTAMP(3),
-    amount DECIMAL(10, 2),
-    status STRING,
-    created_at TIMESTAMP(3),
+    order_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    order_date TIMESTAMP(7) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status STRING NOT NULL,
+    created_at TIMESTAMP(7) NOT NULL,
     WATERMARK FOR order_date AS order_date - INTERVAL '5' SECOND
 ) WITH (
     'connector' = 'paimon',
