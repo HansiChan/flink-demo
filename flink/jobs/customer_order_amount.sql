@@ -1,13 +1,12 @@
--- Flink SQL任务：统计每个客户每小时的订单总量和订单总金额
 SET 'execution.runtime-mode' = 'streaming';
 SET 'table.dynamic-table-options.enabled' = 'true';
 SET 'table.exec.sink.upsert-materialize' = 'NONE';
 SET 'pipeline.name' = 'customer_hourly_order_metrics';
--- 设置checkpoint间隔，确保数据能够提交到Paimon
+
 SET 'execution.checkpointing.interval' = '10s';
 SET 'execution.checkpointing.mode' = 'EXACTLY_ONCE';
 
--- 创建Paimon catalog
+
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
     'warehouse' = 's3://demo/',
@@ -19,10 +18,10 @@ CREATE CATALOG paimon WITH (
 
 USE CATALOG paimon;
 
--- 如果dwd数据库不存在则创建
+
 CREATE DATABASE IF NOT EXISTS dwd;
 
--- 创建dwd层的聚合结果表
+
 CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
     customer_id INT,
     customer_name STRING,
@@ -37,7 +36,7 @@ CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
     'changelog-producer' = 'input'
 );
 
--- 执行聚合任务：统计每个客户每小时的订单指标
+
 INSERT INTO dwd.dwd_customer_order_hourly_metrics
 SELECT
     customer_id,
