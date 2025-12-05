@@ -41,8 +41,8 @@ SELECT
     c.customer_id,
     c.customer_name,
     c.region,
-    DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00') AS window_start,
-    DATE_FORMAT(o.order_date + INTERVAL '1' HOUR, 'yyyy-MM-dd HH:00:00') AS window_end,
+    CAST(hour_str AS TIMESTAMP(3)) AS window_start,
+    CAST(hour_str AS TIMESTAMP(3)) + INTERVAL '1' HOUR AS window_end,
     COUNT(o.order_id) AS order_count,
     SUM(o.amount) AS total_amount
 FROM ods.ods_orders o
