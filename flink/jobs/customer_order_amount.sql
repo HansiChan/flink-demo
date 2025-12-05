@@ -35,21 +35,29 @@ CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
 );
 
 -- 执行聚合任务：统计每个客户每小时的订单指标
--- 使用DATE_FORMAT将时间截断到小时级别进行聚合
 INSERT INTO dwd.dwd_customer_order_hourly_metrics
 SELECT
-    c.customer_id,
-    c.customer_name,
-    c.region,
-    CAST(hour_str AS TIMESTAMP(3)) AS window_start,
-    CAST(hour_str AS TIMESTAMP(3)) + INTERVAL '1' HOUR AS window_end,
-    COUNT(o.order_id) AS order_count,
-    SUM(o.amount) AS total_amount
-FROM ods.ods_orders o
-INNER JOIN ods.ods_customers c
-    ON o.customer_id = c.customer_id
-GROUP BY
-    c.customer_id,
-    c.customer_name,
-    c.region,
-    DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00');
+    customer_id,
+    customer_name,
+    region,
+    window_start,
+    window_start + INTERVAL '1' HOUR AS window_end,
+    order_count,
+    total_amount
+FROM (
+    SELECT
+        c.customer_id,
+        c.customer_name,
+        c.region,
+        CAST(DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00') AS TIMESTAMP(3)) AS window_start,
+        COUNT(o.order_id) AS order_count,
+        SUM(o.amount) AS total_amount
+    FROM ods.ods_orders o
+    INNER JOIN ods.ods_customers c
+        ON o.customer_id = c.customer_id
+    GROUP BY
+        c.customer_id,
+        c.customer_name,
+        c.region,
+        DATE_FORMAT(o.order_date, 'yyyy-MM-dd HH:00:00')
+);
