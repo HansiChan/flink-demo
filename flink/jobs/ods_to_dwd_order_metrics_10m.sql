@@ -31,7 +31,8 @@ CREATE TEMPORARY TABLE ods_orders_with_watermark (
     amount DECIMAL(10, 2) NOT NULL,
     status STRING NOT NULL,
     created_at TIMESTAMP(7) NOT NULL,
-    WATERMARK FOR order_date AS order_date - INTERVAL '5' SECOND
+    event_time AS CAST(order_date AS TIMESTAMP(3)),
+    WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
 ) WITH (
     'connector' = 'paimon',
     'path' = 's3://demo/ods.db/ods_orders',
