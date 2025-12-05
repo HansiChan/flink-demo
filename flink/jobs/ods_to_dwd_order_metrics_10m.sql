@@ -76,33 +76,30 @@ CREATE TABLE IF NOT EXISTS dwd.customer_order_metrics_10m (
 -- Enrich orders with customer info via temporal join, then window
 INSERT INTO dwd.customer_order_metrics_10m
 SELECT
-    tw.window_start,
-    tw.window_end,
-    CAST(tw.window_start AS DATE) AS dt,
-    tw.customer_id,
-    ANY_VALUE(tw.customer_name) AS customer_name,
-    ANY_VALUE(tw.region) AS region,
-    COUNT(*) AS order_cnt,
-    SUM(CASE WHEN tw.status = 'paid' THEN 1 ELSE 0 END) AS paid_cnt,
-    SUM(tw.amount) AS total_amount,
-    SUM(CASE WHEN tw.status = 'paid' THEN tw.amount ELSE 0 END) AS paid_amount,
-    CURRENT_TIMESTAMP AS last_update
-FROM TABLE(
-    TUMBLE(
-        TABLE ods_orders,
-        DESCRIPTOR(order_ts),
-        INTERVAL '10' MINUTES
-    )
-) AS tw (
-    order_id,
-    customer_id,
-    amount,
-    status,
-    order_ts,
-    customer_name,
-    region,
     window_start,
     window_end,
-    window_time
+    CAST(window_start AS DATE) AS dt,
+    customer_id,
+    ANY_VALUE(customer_name) AS customer_name,
+    ANY_VALUE(region) AS region,
+    COUNT(*) AS order_cnt,
+    SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) AS paid_cnt,
+    SUM(amount) AS total_amount,
+    SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS paid_amount,
+    CURRENT_TIMESTAMP AS last_update
+FROM (
+    SELECT
+        o.order_id,
+        o.customer_id,
+        o.amount,
+        o.status,
+        o.order_ts,
+        c.customer_name,
+        c.region,
+        TUMBLE_START(o.order_ts, INTERVAL '10' MINUTES) AS window_start,
+        TUMBLE_END(o.order_ts, INTERVAL '10' MINUTES) AS window_end
+    FROM ods_orders_stream AS o
+    LEFT JOIN ods_customers_dim FOR SYSTEM_TIME AS OF o.proctime AS c
+        ON o.customer_id = c.customer_id
 )
-GROUP BY tw.window_start, tw.window_end, tw.customer_id;
+GROUP BY window_start, window_end, customer_id;
