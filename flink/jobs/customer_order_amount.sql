@@ -3,6 +3,9 @@ SET 'execution.runtime-mode' = 'streaming';
 SET 'table.dynamic-table-options.enabled' = 'true';
 SET 'table.exec.sink.upsert-materialize' = 'NONE';
 SET 'pipeline.name' = 'customer_hourly_order_metrics';
+-- 设置checkpoint间隔，确保数据能够提交到Paimon
+SET 'execution.checkpointing.interval' = '10s';
+SET 'execution.checkpointing.mode' = 'EXACTLY_ONCE';
 
 -- 创建Paimon catalog
 CREATE CATALOG paimon WITH (
