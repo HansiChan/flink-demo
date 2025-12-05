@@ -40,15 +40,18 @@ SELECT
     c.customer_id,
     c.customer_name,
     c.region,
-    TUMBLE_START(o.order_date, INTERVAL '1' HOUR) AS window_start,
-    TUMBLE_END(o.order_date, INTERVAL '1' HOUR) AS window_end,
+    window_start,
+    window_end,
     COUNT(o.order_id) AS order_count,
     SUM(o.amount) AS total_amount
-FROM ods.ods_orders o
+FROM TABLE(
+    TUMBLE(TABLE ods.ods_orders, DESCRIPTOR(order_date), INTERVAL '1' HOUR)
+) o
 INNER JOIN ods.ods_customers c
     ON o.customer_id = c.customer_id
 GROUP BY
     c.customer_id,
     c.customer_name,
     c.region,
-    TUMBLE(o.order_date, INTERVAL '1' HOUR);
+    o.window_start,
+    o.window_end;
