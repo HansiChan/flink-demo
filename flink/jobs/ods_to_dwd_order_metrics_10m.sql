@@ -34,9 +34,7 @@ CREATE TEMPORARY TABLE ods_orders_with_watermark (
     WATERMARK FOR order_date AS order_date - INTERVAL '5' SECOND
 ) WITH (
     'connector' = 'paimon',
-    'warehouse' = 's3://demo/',
-    'database' = 'ods',
-    'table' = 'ods_orders',
+    'path' = 's3://demo/ods.db/ods_orders',
     's3.endpoint' = 'http://minio:9000',
     's3.access-key' = 'minioadmin',
     's3.secret-key' = 'minioadmin',
