@@ -34,6 +34,19 @@ CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
     'changelog-producer' = 'input'
 );
 
+-- 创建带有时间属性的视图
+CREATE TEMPORARY VIEW orders_with_watermark AS
+SELECT
+    order_id,
+    customer_id,
+    order_date,
+    amount,
+    status,
+    created_at,
+    order_date AS event_time,
+    WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
+FROM ods.ods_orders;
+
 -- 执行聚合任务：统计每个客户每小时的订单指标
 INSERT INTO dwd.dwd_customer_order_hourly_metrics
 SELECT
@@ -45,7 +58,7 @@ SELECT
     COUNT(o.order_id) AS order_count,
     SUM(o.amount) AS total_amount
 FROM TABLE(
-    TUMBLE(TABLE ods.ods_orders, DESCRIPTOR(order_date), INTERVAL '1' HOUR)
+    TUMBLE(TABLE orders_with_watermark, DESCRIPTOR(event_time), INTERVAL '1' HOUR)
 ) o
 INNER JOIN ods.ods_customers c
     ON o.customer_id = c.customer_id
