@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS dwd.dwd_customer_order_hourly_metrics (
 );
 
 
+-- Insert hourly aggregated customer order metrics into the DWD layer.
 INSERT INTO dwd.dwd_customer_order_hourly_metrics
 SELECT
     customer_id,
