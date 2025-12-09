@@ -1,0 +1,1 @@
+docker-compose exec jobmanager ./bin/sql-client.sh -f /opt/flink/usrjob/customer_order_amount.sql

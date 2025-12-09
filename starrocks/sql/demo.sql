@@ -15,8 +15,12 @@ show databases;
 use ods;
 show tables;
 
-select * from paimon_catalog_fs.ods.ods_orders where order_id=1;
+select * from paimon_catalog_fs.ods.ods_orders;
 select count(*) from paimon_catalog_fs.ods.ods_orders;
+
+create view ods_orders_vw as 
+select * from paimon_catalog_fs.ods.ods_orders;
+
 
 select * from paimon_catalog_fs.dwd.dwd_customer_order_hourly_metrics;
 select count(*) from paimon_catalog_fs.dwd.dwd_customer_order_hourly_metrics;
@@ -24,10 +28,6 @@ select count(*) from paimon_catalog_fs.dwd.dwd_customer_order_hourly_metrics;
 set catalog default_catalog;
 create database demo_db;
 use demo_db;
-
-create view ods_orders_vw as 
-select * from paimon_catalog_fs.ods.ods_orders;
-
 
 -- dws_customer_order_daily_metrics_mv
 -- This materialized view aggregates the hourly customer order metrics into daily metrics.
