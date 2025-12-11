@@ -1,96 +1,117 @@
-# Docker Compose Project Framework
+# Flink Demo
 
-A docker-compose template that includes SQL Server, MinIO, a SeaTunnel cluster (1 Master + 2 Workers), and Flink. It is suitable as a starting point for data synchronization/CDC experiences.
+A Docker Compose-based environment for data synchronization/CDC experiments, including SQL Server, MinIO, SeaTunnel cluster, Flink, and StarRocks.
 
 ## Directory Structure
-- `docker-compose.yml`: Service orchestration
-- `mssql/`: Custom SQL Server image (including ODS initialization script)
-- `flink/`: Flink-related files
-  - `flink-plugins/`: For Flink plugins like Paimon connector.
-  - `jobs/`: SQL job scripts.
-- `seatunnel/`: SeaTunnel configuration and scripts.
-- `.env.example`: Example for default database environment variables.
 
-## Project Components Overview
+```
+.
+├── docker-compose.yml      # Service orchestration
+├── mssql/                  # SQL Server image (with ODS init scripts)
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── ods_seed.sql        # Seed data
+│   └── ods_writer.sh       # Continuous write script
+├── flink/                  # Flink related
+│   ├── flink-plugins/      # Flink plugins (e.g., Paimon connector)
+│   ├── jobs/               # SQL job scripts
+│   └── script/             # Helper scripts
+├── seatunnel/              # SeaTunnel related
+│   ├── config/             # Job configurations
+│   ├── lib/                # Additional dependencies
+│   └── script/             # Helper scripts
+├── starrocks/              # StarRocks related
+│   └── sql/                # SQL scripts
+└── .env.example            # Environment variables example
+```
 
-| Component     | Description                                                                     | Access Point(s)                                                        |
-|---------------|---------------------------------------------------------------------------------|------------------------------------------------------------------------|
-| **SQL Server**| MSSQL database for ODS data, seeded with `ods_customers` and `ods_orders`.    | `localhost:1433` (SA user, password from `.env`)                       |
-| **MinIO**     | S3-compatible object storage, used for Paimon warehouse.                       | S3 API: `http://localhost:9000`, Console: `http://localhost:9001`      |
-| **SeaTunnel** | Data integration platform for ETL/ELT tasks (1 Master + 2 Workers).           | Master REST: `5801`, User configs: `seatunnel/config`                  |
-| **Flink**     | Stream processing framework (JobManager + TaskManager) for SQL jobs.          | JobManager UI: `http://localhost:8081`                                 |
-| **StarRocks** | Distributed SQL Data Warehouse for high-performance analytics.                 | FE HTTP: `8030`, BE HTTP: `8040`, FE MySQL: `9030` (service `starrocks`)|
+## Components Overview
 
-
+| Component | Description | Access |
+|-----------|-------------|--------|
+| **SQL Server** | ODS data source with `ods_customers` and `ods_orders` tables | `localhost:1433` |
+| **MinIO** | S3-compatible object storage for Paimon warehouse | API: `localhost:9000`, Console: `localhost:9001` |
+| **SeaTunnel** | Data integration platform (1 Master + 2 Workers) | REST: `localhost:5801` |
+| **Flink** | Stream processing framework (JobManager + TaskManager) | UI: `localhost:8081` |
+| **StarRocks** | Distributed SQL analytics database | HTTP: `8030`, MySQL: `9030` |
 
 ## Quick Start
+
 ```bash
-cp .env.example .env          # Edit .env if you need to change database credentials
+cp .env.example .env          # Modify environment variables as needed
 docker-compose up -d --build  # Build images on first launch
 ```
 
-After startup, refer to the "Project Components Overview" table for access points and details of each service.
+## Common Commands
 
-## Common Operations
-- **Start all services**: `docker-compose up -d --build`
-- **Start a single component**:
-  - SQL Server: `docker-compose up -d mssql`
-  - MinIO: `docker-compose up -d minio`
-  - SeaTunnel Cluster: `docker-compose up -d master worker1 worker2`
-  - Flink Cluster: `docker-compose up -d jobmanager taskmanager`
-  - StarRocks: `docker-compose up -d starrocks`
-- **Stop a single component**: `docker-compose stop mssql` (or `minio`, `seatunnel`, etc.)
-- **Stop and clean up**: `docker-compose down -v`
-- **View logs**: `docker-compose logs -f mssql` (or `minio`, `jobmanager`, etc.)
-- **Execute a command in a container**:
-  - SQL Server: `docker-compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C`
-  - MinIO: `docker-compose exec minio /bin/sh`
-  - SeaTunnel Master: `docker-compose exec seatunnel /bin/bash`
-  - Flink JobManager: `docker-compose exec jobmanager /bin/bash`
-  - StarRocks: `docker-compose exec starrocks /bin/bash`
+```bash
+# Start/Stop
+docker-compose up -d --build                      # Start all services
+docker-compose up -d mssql minio                  # Start specific services
+docker-compose up -d master worker1 worker2       # Start SeaTunnel cluster
+docker-compose up -d jobmanager taskmanager       # Start Flink cluster
+docker-compose stop                               # Stop all services
+docker-compose down -v                            # Stop and remove volumes
 
-## SQL Server ODS Notes
-- The `mssql/ods_seed.sql` script creates the `ods` database and seeds it with demo tables (`ods_customers` and `ods_orders` with a foreign key relationship) when the container starts. These tables serve as the ODS data source for subsequent ETL processes. CDC (Change Data Capture) is enabled for both tables.
-- To modify the seed data or table structure, edit `mssql/ods_seed.sql` and rebuild the image: `docker-compose build mssql && docker-compose up -d mssql`.
+# Logs
+docker-compose logs -f mssql                      # View service logs
 
-### Continuous Data Writing (Simulating Real-time ODS Data)
-- By default, a process continuously writes to the `ods_orders` table. You can configure this via `.env`:
-  - `ODS_WRITE_ENABLED`: Enables or disables continuous writing (default: `true`).
-  - `ODS_WRITE_INTERVAL_SECONDS`: Interval between writes in seconds (default: `2`).
-  - `ODS_WRITE_BATCH_SIZE`: Number of rows to write in each batch (default: `1`).
-- The writer script is `mssql/ods_writer.sh`, started by `entrypoint.sh`. Modify the script and rebuild the image to change the logic.
+# Shell access
+docker-compose exec mssql sqlcmd -S localhost -U SA -P $MSSQL_SA_PASSWORD -C
+docker-compose exec jobmanager /bin/bash
+docker-compose exec starrocks /bin/bash
+```
 
-## SeaTunnel Notes
-- The image uses `apache/seatunnel:2.3.12`. The local configuration directory `seatunnel/config` is mounted into the container.
-- An example job `seatunnel/config/sqlserver_to_paimon.conf` demonstrates reading CDC data from two SQL Server tables (`ods_customers`, `ods_orders`) and writing to a Paimon table on MinIO.
-  - To run the example: `sh seatunnel/script/start_task.sh`
-  - **Prerequisite**: Create the Paimon bucket in MinIO first (default: `paimon-warehouse`).
+## SQL Server (ODS Data Source)
 
-## Flink (SQL Example)
-- The Flink cluster uses the official `flink:1.20.1` image.
-- The local `flink/jobs` directory is mounted to `/opt/flink/usrlib` in the container.
-- Plugin JARs (e.g., for Paimon, S3) are placed in `flink/flink-plugins/` and mounted to `/opt/flink/plugins` in the container.
-- Example job: `flink/jobs/customer_order_amount.sql` (real-time aggregation of `ods_orders` and `ods_customers`, writing to a Paimon table).
+On startup, `mssql/ods_seed.sql` creates the `ods` database and initializes `ods_customers` and `ods_orders` tables with CDC enabled.
 
-### Starting and Stopping the Flink Cluster
-- **Start the cluster**:
-  ```bash
-  docker-compose up -d jobmanager taskmanager
-  ```
-- **Stop the cluster**:
-  ```bash
-  docker-compose stop jobmanager taskmanager
-  ```
+**Continuous Write Configuration** (simulates real-time data, configured via `.env`):
 
-### Submitting a Flink SQL Streaming Job
-- Before running, ensure that the required plugin JARs (e.g., `paimon-flink-*.jar`) compatible with Flink 1.20.1 are in the `flink/flink-plugins` directory.
-- **Submit the job**:
-  ```bash
-  docker-compose exec jobmanager ./bin/sql-client.sh -f /opt/flink/usrjob/customer_order_amount.sql
-  ```
-- You can stop the job via the Flink UI (`http://localhost:8081`) or by using the command line (`./bin/flink list` followed by `./bin/flink cancel <jobId>`).
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ODS_WRITE_ENABLED` | Enable continuous writing | `true` |
+| `ODS_WRITE_INTERVAL_SECONDS` | Write interval (seconds) | `2` |
+| `ODS_WRITE_BATCH_SIZE` | Rows per batch | `1` |
 
-## Further Extension Ideas
-- Add business logic to an application service.
-- Add new services (e.g., message queues, front-end applications, task schedulers) to `docker-compose.yml`.
-- Use `.env` to override default variables and reference them in a CI/CD pipeline.
+## SeaTunnel
+
+Image: `apache/seatunnel`, config directory mounted to `seatunnel/config`.
+
+Example job `seatunnel/config/sqlserver_to_paimon.conf` demonstrates reading CDC data from SQL Server and writing to Paimon.
+
+```bash
+# Run example (create paimon-warehouse bucket in MinIO first)
+sh seatunnel/script/start_task.sh
+```
+
+## Flink
+
+Image: `flink:1.20.2-scala_2.12-java11`
+
+- Job scripts: `flink/jobs/` → mounted to `/opt/flink/usrjob`
+- Plugin JARs: `flink/flink-plugins/` → mounted to `/opt/flink/lib/userlib`
+
+```bash
+# Submit SQL job
+docker-compose exec jobmanager ./bin/sql-client.sh -f /opt/flink/usrjob/<your_job>.sql
+
+# Cancel job: via UI (localhost:8081) or CLI
+docker-compose exec jobmanager ./bin/flink list
+docker-compose exec jobmanager ./bin/flink cancel <jobId>
+```
+
+## StarRocks
+
+Image: `starrocks/allin1-ubuntu`
+
+```bash
+# Connect to StarRocks
+mysql -h 127.0.0.1 -P 9030 -u root
+```
+
+## Extension Ideas
+
+- Add business services or frontend applications
+- Integrate message queues (Kafka, etc.)
+- Use `.env` with CI/CD pipelines for environment management

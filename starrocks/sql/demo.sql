@@ -21,6 +21,9 @@ select count(*) from paimon_catalog_fs.ods.ods_orders;
 create view ods_orders_vw as 
 select * from paimon_catalog_fs.ods.ods_orders;
 
+update paimon_catalog_fs.ods.ods_orders_vw set amount = 201.21 where order_id = 1;
+update paimon_catalog_fs.ods.ods_orders_vw set amount = 192.55 where order_id = 2;
+
 
 select * from paimon_catalog_fs.dwd.dwd_customer_order_hourly_metrics;
 select count(*) from paimon_catalog_fs.dwd.dwd_customer_order_hourly_metrics;
