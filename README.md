@@ -1,6 +1,6 @@
 # Flink Demo
 
-A Docker Compose-based environment for data synchronization/CDC experiments, including SQL Server, MinIO, SeaTunnel cluster, Flink, and StarRocks.
+A Docker Compose-based environment for data synchronization/CDC experiments, including SQL Server, MinIO, SeaTunnel cluster, Flink, StarRocks, and Tapdata.
 
 ## Directory Structure
 
@@ -34,6 +34,7 @@ A Docker Compose-based environment for data synchronization/CDC experiments, inc
 | **SeaTunnel** | Data integration platform (1 Master + 2 Workers) | REST: `localhost:5801` |
 | **Flink** | Stream processing framework (JobManager + TaskManager) | UI: `localhost:8081` |
 | **StarRocks** | Distributed SQL analytics database | HTTP: `8030`, MySQL: `9030` |
+| **Tapdata** | Live data platform for real-time data integration | UI: `localhost:3030` |
 
 ## Quick Start
 
@@ -109,6 +110,33 @@ Image: `starrocks/allin1-ubuntu`
 # Connect to StarRocks
 mysql -h 127.0.0.1 -P 9030 -u root
 ```
+
+## Tapdata
+
+Image: `ghcr.io/tapdata/tapdata:latest`
+
+Tapdata is a live data platform that provides real-time data integration, synchronization, and transformation capabilities.
+
+**Resource Requirements:**
+- At least 5GB available memory
+- At least 20GB available disk space
+- At least 1 CPU core
+
+**Access:**
+```bash
+# Start Tapdata
+docker-compose up -d tapdata
+
+# Wait for about 3 minutes for the service to fully start
+# Then access the Web UI at: http://localhost:3030
+```
+
+**Default Credentials:**
+- Username: `admin@admin.com`
+- Password: `admin`
+
+**Data Persistence:**
+Tapdata data is persisted in the `tapdata-data` Docker volume.
 
 ## Extension Ideas
 
